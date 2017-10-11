@@ -28,7 +28,7 @@ long tiempoPulsaciones;
 // Definición de constantes
 int potenciometroEnRespiracion = 25;
 int toleranciaPulso = 550;   
-int tiempoLecturaPulso=10;
+int tiempoLecturaPulso = 0.01;
 
 void setup() {
   pinMode(LED13,OUTPUT);
@@ -37,7 +37,7 @@ void setup() {
   pinMode(led, OUTPUT);
   tiempoAnterior = millis();
   tiempoAnteriorLectura = millis();
-  long tiempoPulsaciones=millis();
+  tiempoPulsaciones=millis();
   //Serial.begin(9600);
 }
 
@@ -156,16 +156,15 @@ void cambiarEstadoActuador(int &actuador, int estado) {
 void leePulsaciones(){
   senialPulso = analogRead(sensorPulsasiones);
   Serial.println(senialPulso);                    
-  if(abs(tiempoPulsaciones - millis()) >=tiempoLecturaPulso)
-  {
-     if(senialPulso > toleranciaPulso){                          
-     digitalWrite(LED13,HIGH);  
-     tiempoPulsaciones=millis();
-     } else {
-     digitalWrite(LED13,LOW); 
-    tiempoPulsaciones=millis();    
-     }
-   }
+  if(lapsoTiempo(tiempoPulsaciones,tiempoLecturaPulso)) {
+    if(senialPulso > toleranciaPulso){
+      digitalWrite(LED13,HIGH);  
+      tiempoPulsaciones=millis();
+    } else {
+      digitalWrite(LED13,LOW); 
+      tiempoPulsaciones=millis();    
+    }
+  }
 }
 
 
