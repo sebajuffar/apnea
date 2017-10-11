@@ -3,11 +3,16 @@ int potenciometro = A0;
 int buzzer = 8;
 int ventilador = 7;
 int led = 9;
+//TODO: ver donde lo ponemos
+int sensorPulsasiones = 6; 
+int LED13=13;
 
 // Definicion de valores de sensores
 int valorPotenciometro = 0;
 int valorPotenciometroAnterior = 0;
 int diferenciaValorPotenciometro;
+int senialPulso;
+
 
 // Definición de estados
 int huboMovimiento = 1;
@@ -18,16 +23,21 @@ int sonarAlarma = 1;
 long tiempoAnterior;
 long tiempoAnteriorLectura;
 long tiempoAnteriorAlarma;
+long tiempoPulsaciones;
 
 // Definición de constantes
 int potenciometroEnRespiracion = 25;
+int toleranciaPulso = 550;   
+int tiempoLecturaPulso=10;
 
 void setup() {
+  pinMode(LED13,OUTPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(ventilador, OUTPUT);
   pinMode(led, OUTPUT);
   tiempoAnterior = millis();
   tiempoAnteriorLectura = millis();
+  long tiempoPulsaciones=millis();
   //Serial.begin(9600);
 }
 
@@ -75,6 +85,7 @@ void loop() {
   } else {
     desactivarActuadores();
   }
+  leePulsaciones();
 }
 
 
@@ -139,6 +150,22 @@ boolean lapsoTiempo(long tiempo, float lapso) {
 // @var estado el estado que se asignará
 void cambiarEstadoActuador(int &actuador, int estado) {
   actuador = estado;
+}
+
+
+void leePulsaciones(){
+  senialPulso = analogRead(sensorPulsasiones);
+  Serial.println(senialPulso);                    
+  if(abs(tiempoPulsaciones - millis()) >=tiempoLecturaPulso)
+  {
+     if(senialPulso > toleranciaPulso){                          
+     digitalWrite(LED13,HIGH);  
+     tiempoPulsaciones=millis();
+     } else {
+     digitalWrite(LED13,LOW); 
+    tiempoPulsaciones=millis();    
+     }
+   }
 }
 
 
