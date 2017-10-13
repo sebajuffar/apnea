@@ -1,10 +1,18 @@
+#include <OneWire.h>                 //Se importan las bibliotecas
+#include <DallasTemperature.h>
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
+SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Definición de pines
 int potenciometro = A0;
 int buzzer = 8;
 int ventilador = 7;
 int led = 9;
+int termometro = 2;
 //TODO: ver donde lo ponemos
-int sensorPulsasiones = 6; 
+int sensorPulsasiones = A1; 
 int LED13=13;
 
 // Definicion de valores de sensores
@@ -12,6 +20,7 @@ int valorPotenciometro = 0;
 int valorPotenciometroAnterior = 0;
 int diferenciaValorPotenciometro;
 int senialPulso;
+double temperatura = 0;
 
 
 // Definición de estados
@@ -30,7 +39,13 @@ int potenciometroEnRespiracion = 25;
 int toleranciaPulso = 550;   
 int tiempoLecturaPulso = 0.01;
 
+
+OneWire ourWire(termometro);                //Se establece el pin declarado como bus para la comunicación OneWire
+DallasTemperature sensors(&ourWire); //Se llama a la librería DallasTemperature
+
+
 void setup() {
+  delay(1000);
   pinMode(LED13,OUTPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(ventilador, OUTPUT);
@@ -39,9 +54,26 @@ void setup() {
   tiempoAnteriorLectura = millis();
   tiempoPulsaciones=millis();
   //Serial.begin(9600);
+  /////////////////////////////////////bluetooth////////////////////////////////////
+   BT.begin(9600);       // Inicializamos el puerto serie BT (Para Modo AT 2)
+  Serial.begin(9600);   // Inicializamos  el puerto serie 
+  ////////////////////////////////////////////////////////////////////////////////////
+  sensors.begin(); 
 }
 
 void loop() {
+////////////////////////////////bluetooth/////////////////////////////////////////////
+ if(BT.available())    // Si llega un dato por el puerto BT se envía al monitor serial
+  {
+    Serial.write(BT.read());
+  }
+  if(Serial.available())  // Si llega un dato por el monitor serial se envía al puerto BT
+  {
+     BT.write(Serial.read());
+  }
+/////////////////////////////////////////////////////////////////////////////////////
+
+  
   valorPotenciometro = analogRead(potenciometro);
   diferenciaValorPotenciometro = abs(valorPotenciometro - valorPotenciometroAnterior);
   valorPotenciometroAnterior = valorPotenciometro;
@@ -86,6 +118,16 @@ void loop() {
     desactivarActuadores();
   }
   leePulsaciones();
+  leeTemperatura();
+  
+  BT.print("Tiempo: ");
+  BT.print(millis());
+  BT.print(", Pote: ");
+  BT.print(valorPotenciometro);
+  BT.print(", Pulso: ");
+  BT.print(senialPulso);
+  BT.print(", Temperatura: ");
+  BT.println(temperatura); 
 }
 
 
@@ -167,5 +209,7 @@ void leePulsaciones(){
   }
 }
 
-
-
+void leeTemperatura(){
+  sensors.requestTemperatures();       //Prepara el sensor para la lectura
+  temperatura = sensors.getTempCByIndex(0); //Se lee e imprime la temperatura en grados Centigrados
+  }
