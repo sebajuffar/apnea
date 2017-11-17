@@ -20,7 +20,7 @@ SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectad
 #define potenciometroEnRespiracion 25
 #define toleranciaPulso 550
 #define tiempoLecturaPulso 0.01
-#define toleranciaPotenciometro 60
+#define toleranciaPotenciometro 100
 #define cantidadMuestrasRespiracion 10
 #define maxTiempoCalibracion 40
 #define intervaloConfianza 0.05
