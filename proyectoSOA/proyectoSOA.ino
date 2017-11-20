@@ -52,6 +52,7 @@ bool reportarTemperatura;
 #define LED13 13
 
 // Definición de constantes
+#define tiempoEmergencia 17000
 #define intervaloIntensidadBuzzer 5000
 #define intervaloSegundosIntensidadBuzzer 2
 #define potenciometroEnRespiracion 25
@@ -89,6 +90,7 @@ int creceDecreceAnterior;
 long tiempoAnterior;
 long tiempoAnteriorLectura;
 long tiempoAnteriorAlarma;
+long tiempoInicioAlarma = 0;
 long tiempoPulsaciones;
 long tiempoEsperaBuzzer;
 long tiempoCambioIntensidad;
@@ -158,7 +160,6 @@ void loop() {
           durmiendo = true;
           Serial.println("Comenzar fase de sueño.");
           BT.println(ACK_DORMIR);
-          
           inicializaValoresCalibracion(); 
         }
         break;
@@ -167,8 +168,9 @@ void loop() {
         if ( conectado && durmiendo ) {         // Si se confirmó la conexión y estaba durmiendo, termina la fase de sueño. Si no, ignora.
           durmiendo = false;
           reportarRespiracion = false;
-          sensorCalibrado = false;
+          inicializaValoresCalibracion(); 
           desactivarActuadores();
+          estadoAlarma = 0;
           Serial.println("Finalizar fase de sueño.");
           BT.println(ACK_DESPERTAR);
           
@@ -205,6 +207,19 @@ void loop() {
   #endif
   unsigned long timestamp = millis();
   if ( conectado ) {
+    if ( estadoAlarma ) {
+      BT.print(ALARMA);               // Etiqueta del mensaje
+      BT.print(":");                  // Separador
+      BT.println(timestamp);          // Timestamp + fin de linea
+    if ( (timestamp-tiempoInicioAlarma) > tiempoEmergencia ) {    //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
+      BT.print(EMERGENCIA);                           // Etiqueta del mensaje
+      BT.print(":");                                  // Separador
+      BT.println(timestamp);                          // Timestamp + fin de linea
+      }
+    }
+
+    
+    
     if ( reportarPulso ) {
       BT.print(PULSO);                // Etiqueta del mensaje
       BT.print(":");                  // Separador
@@ -260,6 +275,7 @@ void duerme(){
 
 
 void inicializaValoresCalibracion(){
+  tiempoInicioAlarma = 0;
   inicializoVectorInhalaExhala();
   sensorCalibrado=false;
   tiempoCalibracion=0;
@@ -398,10 +414,14 @@ void controlaSuenio(){
       //ACTIVO ALARMA
       estadoAlarma = 1;
       actualizaMarcaTiempo(&tiempoAnteriorAlarma);
+      if ( tiempoInicioAlarma == 0 ) {                          //Si es la primera vez que se prende(=0), se guarda el tiempo en el que se activó la alarma para luego consultar cuanto tiempo estuvo prendida
+        tiempoInicioAlarma = millis();        
+      }
       //Serial.println("asignar tiempoAnteriorAlarma1");
     } else {
       //DESACTIVO ALARMA
       estadoAlarma = 0;
+      tiempoInicioAlarma = 0;
     }
     actualizaMarcaTiempo(&tiempoAnterior);
   }
