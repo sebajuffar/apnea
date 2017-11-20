@@ -3,8 +3,8 @@
 //============================= BLUETOOTH =================================================
 #define BTCONF 0              // Activa el envío de comandos AT por el Serial Monitor hacia el BT
 //#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
-#include <AltSoftSerial.h>      // Usamos la biblioteca AltSoftSerial porque la que viene por defecto da ciertos problemas al enviar y recibir "al mismo tiempo"
 //SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
+#include <AltSoftSerial.h>      // Usamos la biblioteca AltSoftSerial porque la que viene por defecto da ciertos problemas al enviar y recibir "al mismo tiempo"
 AltSoftSerial BT;             //AltSoftSerial usa 8 para RX y 9 para TX
 
 // Comandos que llegan por BT
@@ -222,11 +222,12 @@ void loop() {
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea  
         
-      } else {                            // Sensor todavia no calibrado
+      } else if ( durmiendo ) {                            // Sensor todavia no calibrado
         BT.print(CALIBRANDO);           // Etiqueta del mensaje
         BT.print(":");                  // Separador
-        BT.println(timestamp);          // Timestamp + fin de linea
-        
+        BT.println(timestamp);          // Timestamp + fin de linea 
+      } else {
+        reportarRespiracion = false;
       }
       
       
