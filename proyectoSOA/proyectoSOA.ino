@@ -146,11 +146,11 @@ void loop() {
       case desconectar:
         if ( conectado ) {
           Serial.println("Desconectado.");
-          BT.println(ACK_DESCONECTAR);
           conectado = false;
           reportarPulso = false;
           reportarRespiracion = false;
           reportarTemperatura = false;
+          BT.println(ACK_DESCONECTAR);
         }
         break;
 
@@ -259,7 +259,8 @@ void loop() {
   
   if ( durmiendo )    // Una vez activado el sueño no hace falta que siga conectado, por eso no pregunta por la conexion
     duerme();
-  
+  leePulsaciones();
+  leeTemperatura();
 }
 
 void duerme(){
@@ -431,9 +432,6 @@ void controlaSuenio(){
   } else {
     desactivarActuadores();
   }
-  leePulsaciones();
-  leeTemperatura();
-
   /* NO VA EN LA VERSION FINAL
   BT.print("Tiempo: ");
   BT.print(millis());
