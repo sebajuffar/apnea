@@ -227,7 +227,7 @@ void loop() {
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea 
       } else {
-        reportarRespiracion = false;
+        reportarRespiracion = false; 
       }
       
       
