@@ -129,10 +129,10 @@ void setup() {
 
 void loop() {
 //==================================== Bluetooth =====================================
+//==================================== Recepción de mensajes ==============================
  if(BT.available())    
   {
     char msg = BT.read();   // Lee de a un byte
-    
     switch(msg) {
       case conectar:
         if ( !conectado ) {
@@ -147,7 +147,6 @@ void loop() {
         if ( conectado ) {
           Serial.println("Desconectado.");
           BT.println(ACK_DESCONECTAR);
-          
           conectado = false;
           reportarPulso = false;
           reportarRespiracion = false;
@@ -205,6 +204,8 @@ void loop() {
        BT.write(Serial.read());
     }
   #endif
+  
+  // =========================================== Envio de mensajes ==============================================
   unsigned long timestamp = millis();
   if ( conectado ) {
     if ( estadoAlarma ) {
@@ -217,16 +218,13 @@ void loop() {
       BT.println(timestamp);                          // Timestamp + fin de linea
       }
     }
-
-    
-    
+       
     if ( reportarPulso ) {
       BT.print(PULSO);                // Etiqueta del mensaje
       BT.print(":");                  // Separador
       BT.print(senialPulso);          // Valor de la señal
       BT.print(":");                  // Separador
       BT.println(timestamp);          // Timestamp + fin de linea
-      
     }
     
     if ( reportarRespiracion ) {
@@ -236,7 +234,6 @@ void loop() {
         BT.print(valorPotenciometro);   // Valor de la señal
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea  
-        
       } else if ( durmiendo ) {                            // Sensor todavia no calibrado
         BT.print(CALIBRANDO);           // Etiqueta del mensaje
         BT.print(":");                  // Separador
@@ -257,6 +254,9 @@ void loop() {
         
     }
   }
+
+  //=============================== fin Bluetooth =============================================
+  
   if ( durmiendo )    // Una vez activado el sueño no hace falta que siga conectado, por eso no pregunta por la conexion
     duerme();
   
