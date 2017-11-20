@@ -2,8 +2,10 @@
 #include <DallasTemperature.h>
 //============================= BLUETOOTH =================================================
 #define BTCONF 0              // Activa el envío de comandos AT por el Serial Monitor hacia el BT
-#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
-SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
+//#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
+#include <AltSoftSerial.h>      // Usamos la biblioteca AltSoftSerial porque la que viene por defecto da ciertos problemas al enviar y recibir "al mismo tiempo"
+//SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
+AltSoftSerial BT;             //AltSoftSerial usa 8 para RX y 9 para TX
 
 // Comandos que llegan por BT
 enum bt_msg {
@@ -42,9 +44,9 @@ bool reportarTemperatura;
 
 // Definición de pines
 #define potenciometro A0
-#define buzzer 8
+#define buzzer 10 //era 8
 #define ventilador 7
-#define led 9
+#define led 11 // era 9
 #define termometro 2
 #define sensorPulsasiones A1
 #define LED13 13
@@ -134,7 +136,7 @@ void loop() {
         if ( !conectado ) {
           Serial.println("Conectado.");
           BT.println(ACK_CONECTAR);
-          BT.flush();
+          
           conectado = true;
         }
         break;
@@ -143,7 +145,7 @@ void loop() {
         if ( conectado ) {
           Serial.println("Desconectado.");
           BT.println(ACK_DESCONECTAR);
-          BT.flush();
+          
           conectado = false;
           reportarPulso = false;
           reportarRespiracion = false;
@@ -156,7 +158,7 @@ void loop() {
           durmiendo = true;
           Serial.println("Comenzar fase de sueño.");
           BT.println(ACK_DORMIR);
-          BT.flush();
+          
           inicializaValoresCalibracion(); 
         }
         break;
@@ -164,10 +166,13 @@ void loop() {
        case despertarse:
         if ( conectado && durmiendo ) {         // Si se confirmó la conexión y estaba durmiendo, termina la fase de sueño. Si no, ignora.
           durmiendo = false;
+          reportarRespiracion = false;
+          sensorCalibrado = false;
+          desactivarActuadores();
           Serial.println("Finalizar fase de sueño.");
           BT.println(ACK_DESPERTAR);
-          BT.flush();
-          inicializaValoresCalibracion(); 
+          
+          
         }
         break;
         
@@ -185,7 +190,7 @@ void loop() {
         break;
       default:
         Serial.print("Comando desconocido: ");
-        Serial.println(
+        Serial.println(msg);
         break;
     }
     
@@ -206,7 +211,7 @@ void loop() {
       BT.print(senialPulso);          // Valor de la señal
       BT.print(":");                  // Separador
       BT.println(timestamp);          // Timestamp + fin de linea
-      BT.flush();
+      
     }
     
     if ( reportarRespiracion ) {
@@ -216,12 +221,12 @@ void loop() {
         BT.print(valorPotenciometro);   // Valor de la señal
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea  
-        BT.flush();
+        
       } else {                            // Sensor todavia no calibrado
         BT.print(CALIBRANDO);           // Etiqueta del mensaje
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea
-        BT.flush();
+        
       }
       
       
@@ -233,14 +238,11 @@ void loop() {
         BT.print(temperatura);          // Valor de la señal
         BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea
-        BT.flush();
+        
     }
   }
-  
-  
   if ( durmiendo )    // Una vez activado el sueño no hace falta que siga conectado, por eso no pregunta por la conexion
     duerme();
-    
   
 }
 
