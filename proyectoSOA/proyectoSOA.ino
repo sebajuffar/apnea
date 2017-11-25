@@ -59,8 +59,8 @@ bool reportarTemperatura;
 #define toleranciaPulso 550
 #define tiempoLecturaPulso 0.01
 #define toleranciaPotenciometro 100
-#define cantidadMuestrasRespiracion 10
-#define maxTiempoCalibracion 40
+#define cantidadMuestrasRespiracion 10  
+#define maxTiempoCalibracion 100000000
 #define intervaloConfianza 0.05
 
 //Constantes tiempo
@@ -158,7 +158,8 @@ void loop() {
           durmiendo = true;
           Serial.println("Comenzar fase de sueño.");
           BT.println(ACK_DORMIR);
-          inicializaValoresCalibracion(); 
+          inicializaValoresCalibracion();
+          calibraSensorRespiracion(); 
         }
         break;
 
@@ -213,7 +214,7 @@ void loop() {
       BT.print(ALARMA);               // Etiqueta del mensaje
       BT.print(":");                  // Separador
       BT.println(timestamp);          // Timestamp + fin de linea
-    if ( (timestamp-tiempoInicioAlarma) > tiempoEmergencia ) {    //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
+    if ( (timestampLong-tiempoInicioAlarma) > tiempoEmergencia ) {    //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
       BT.print(EMERGENCIA);                           // Etiqueta del mensaje
       BT.print(":");                                  // Separador
       BT.println(timestamp);                          // Timestamp + fin de linea
@@ -280,13 +281,13 @@ void inicializaValoresCalibracion(){
   tiempoInicioAlarma = 0;
   inicializoVectorInhalaExhala();
   sensorCalibrado=false;
-  tiempoCalibracion=0;
   creceDecreceAnterior=0;
   contadorMuestrasRespiracion=0;
   mediaTiempoRespiracion=0;
   actualizaMarcaTiempo(&tiempoCalibracion);
   valorPotenciometroAnteriorAuxiliarMedia=0;
   desvioTiempoRespiracion=0;
+  sensorCalibrado=0;
   Serial.println("Calibrando Sensor Respiración");
 }
 
@@ -294,11 +295,13 @@ void inicializaValoresCalibracion(){
 void calibraSensorRespiracion(){
   if(!sensorCalibrado){ 
     if(lapsoTiempo(tiempoCalibracion, maxTiempoCalibracion)){
+        Serial.println(":)");
         calculaDatosEstadisticos();
+        
     }
     else{
         leerPotenciometro();
-        int diferenciaPotenciometro=valorPotenciometro-valorPotenciometroAnteriorAuxiliarMedia;
+        int    diferenciaPotenciometro=valorPotenciometro-valorPotenciometroAnteriorAuxiliarMedia;
         valorPotenciometroAnteriorAuxiliarMedia=valorPotenciometro;
         //Guarda 1 o -1, si crece o decrece   
         creceDecrece=diferenciaPotenciometro!=0?diferenciaPotenciometro/abs(diferenciaPotenciometro):creceDecrece;
@@ -313,6 +316,7 @@ void calibraSensorRespiracion(){
             //Serial.println(contadorMuestrasRespiracion);
             if(contadorMuestrasRespiracion>=cantidadMuestrasRespiracion)
             {
+                Serial.println("1");
                 calculaDatosEstadisticos();
             }
         }
