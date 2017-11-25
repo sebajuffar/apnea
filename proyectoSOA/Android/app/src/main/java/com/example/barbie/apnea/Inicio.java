@@ -57,11 +57,11 @@ public class Inicio extends AppCompatActivity {
             }
         });
 
-        configurarYLanzarThreads();
+        configurarThread();
 
     }
 
-    private void configurarYLanzarThreads() {
+    private void configurarThread() {
         if ( conexionBluetooth == null ) {
             try {
                 conexionBluetooth = new ConexionBluetooth();
@@ -73,11 +73,6 @@ public class Inicio extends AppCompatActivity {
                 return;
             }
         }
-        threadBluetooth = new Thread(conexionBluetooth);
-        threadBluetooth.start();
-
-
-
     }
 
     @Override
@@ -152,11 +147,14 @@ public class Inicio extends AppCompatActivity {
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
         }else
             Toast.makeText(this, "Aplicacion encendida", Toast.LENGTH_SHORT).show();
+            conexionBluetooth.dormir();
     }
 
     public void onClickDetener(View view){
         if(appEncendida == false){
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
+            conexionBluetooth.despertar();
+            conexionBluetooth.desconectar();
         }
     }
 
@@ -164,6 +162,8 @@ public class Inicio extends AppCompatActivity {
         if(appEncendida == false){
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
         }
+        conexionBluetooth.pedirRespiracion();
+        conexionBluetooth.pedirPulso();
     }
 
     public static ConexionBluetooth getConexionBluetooth() {

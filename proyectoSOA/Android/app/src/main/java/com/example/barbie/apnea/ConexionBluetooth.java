@@ -5,9 +5,11 @@ import android.os.*;
 import android.util.Log;
 
 
+
+import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 public class ConexionBluetooth implements Runnable {
@@ -17,6 +19,12 @@ public class ConexionBluetooth implements Runnable {
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private OutputStream outputStream;
     private InputStream inputStream;
+    Handler h;
+    final int RECIEVE_MESSAGE = 1;
+    private StringBuilder sb = new StringBuilder();
+
+    private InputStreamReader inputStreamReader;
+    private BufferedReader bufferedReader;
 
 
     public ConexionBluetooth() throws Exception {
@@ -36,7 +44,104 @@ public class ConexionBluetooth implements Runnable {
 
     @Override
     public void run() {
-        byte buffer[] = new byte[500];
+        /*
+        Looper.prepare();
+        h = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                switch (msg.what) {
+                    case RECIEVE_MESSAGE:													// if receive massage
+                        byte[] readBuf = (byte[]) msg.obj;
+                        String strIncom = new String(readBuf, 0, msg.arg1);					// create string from bytes array
+                        sb.append(strIncom);												// append string
+                        int endOfLineIndex = sb.indexOf("\r\n");							// determine the end-of-line
+                        if (endOfLineIndex > 0) { 											// if end-of-line,
+                            String sbprint = sb.substring(0, endOfLineIndex);				// extract string
+                            sb.delete(0, sb.length());										// and clear
+                            Log.d("Conexión Bluetooth", "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
+                        }
+                        break;
+                }
+            };
+        };
+        */
+        byte[] buffer = new byte[256];  // buffer store for the stream
+        int bytes; // bytes returned from read()
+        // Keep listening to the InputStream until an exception occurs
+        Log.d("Thread bt:","Loopea");
+
+        while (true) {
+                leeLinea();
+        }
+    }
+
+    public String leeLinea(){
+        String linea = new String("");
+        try{
+            if (inputStream != null && inputStream.available() > 0) {
+                //bytes= inputStream.read(buffer,0,5);        // Get number of bytes and message in "buffer"
+                linea= bufferedReader.readLine();
+                Log.d("Treadbtlectura:",linea);
+            }
+            }
+        catch (IOException e) {
+            return e.getMessage();
+        }
+        return linea;
+    }
+
+    public void dormir(){
+        try {
+            outputStream.write("d".getBytes());
+        }
+        catch (IOException e) {
+            return;
+        }
+    }
+
+    public void desconectar()
+    {
+        try {
+            enviarDatos(",");
+            if ( estaConectado() ) {
+                inputStream.close();
+                outputStream.close();
+                btSocket.close();
+            }
+        } catch (Exception e) {
+
+        } finally {
+            inputStream = null;
+            outputStream = null;
+            btSocket = null;
+            dispositivoConectado = null;
+        }
+    }
+
+    public void despertar()
+    {
+        enviarDatos("w");
+    }
+
+    private void enviarDatos(String mensaje){
+            if(outputStream != null) {
+                try {
+                    outputStream.write(mensaje.getBytes());
+                } catch (IOException e) {
+                    return;
+                }
+            }
+    }
+
+    public void  pedirRespiracion(){
+        enviarDatos("r");
+    }
+    public void  pedirPulso(){
+        enviarDatos("p");
+    }
+
+
+    public boolean parsearMensajes() {
+        byte[] buffer = new byte[256];
         while(true)  {
             Log.d("ThreadBT","Arranco el thread");
             if ( inputStream != null ) {
@@ -133,11 +238,17 @@ public class ConexionBluetooth implements Runnable {
             inputStream = btSocket.getInputStream();
             outputStream = btSocket.getOutputStream();
             outputStream.write(".".getBytes());
+            inputStreamReader = new InputStreamReader(inputStream);
+            bufferedReader = new BufferedReader(inputStreamReader);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        lanzarThreads();
+    }
 
-
+    private void lanzarThreads() {
+        Thread threadBluetooth = new Thread(this);
+        threadBluetooth.start();
     }
 
     public boolean estaConectado() {
