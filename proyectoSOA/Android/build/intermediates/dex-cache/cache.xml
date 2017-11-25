@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/f80be0c69f6c9d133a023b3f4503367a57b477cc/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="9935891f23923f39d002087085d9696568a9f657">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_f4d9e40557a08fbd7162bfa1044f0af8ead38cc0/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/409aad227e2f98b1dc5c9325060138795d9f6d27/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="88246166d5afb106f532f6e6deae683c66b42c89">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_18ec7bf2f91aca9d11f7f54960de45a65362aa2c/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/caab1bbd9be8a06c0b1d29e96706803451240c1b/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="fcd01fd11233459f546c437ec927e9b61bf7caf1">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_c24bc37f8fa513a4f8d87ed4b0d1efb5ae9bc35d/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/daf9d0c6de8550ea1303f0779adb8962cea82508/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="18d31838aa4fcc768a8a0516e22cc13b94655d89">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_57dd1c36f6b96dc722b90b1a2be0e9d830610f24/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/4496fc3dcaa89f3017310bdcc14579e8a9625c10/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="44ee06abb66da30f5855e6bf54574e64cdcd982a">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_4f64bd7e1d435a920685f542de444e754f14627e/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_02a8502387d69d1daf5f654032f26bfa9e3fa3eb/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/6ea5e099a77d626c82921e7fe7ec6c8cd58a55d0/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="6a022bf00ccd0948a8180c505e8e458bbddd43a6">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_400791a0b24096fc762d208e2e005b004a977903/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/250160c003631a632a40d9b29893b313fa9762df/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="2e92aa0163544a804a0b34f169ca61801770839a">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_f3051898e6c5e9dce187c3be7ac43dedcdad18ca/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/d41e93eadd669c116dae8c7b7e6d03a6a9925408/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="8df0e365e40beb151bc42dee20817721a6cab7b0">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_27da19a225e42c7638a1b545e7abadf7dea8620e/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/Library/Android/sdk/extras/m2repository/com/android/support/constraint/constraint-layout-solver/1.0.2/constraint-layout-solver-1.0.2.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="b9cd8fc6bd15cb915735d34535db30ece0c44603">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/constraint-layout-solver-1.0.2_58ea59922e3094aa74e369d5a1318d5edd3acf6c/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="705a1fb3d814270aa462d3272c7023d6ce6f6a8d">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_7a7303b29c8d5484b3f2611e5c642de4db4f78ab/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/732e1a2551bb82fe52e67775fed531cc8aec6635/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="47471eb19df288158b00b8d9cfa41bce7373f5cc">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_2bd6cbd7ea61cb9df1fad37e47ad727fad689cb5/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/578677be3147030ec5681691ab6daba212b206b4/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="c4f45092eee6cdf1a5dbd597b2b6819be652ce2e">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_03394b7382926ecdc61abaf808a52b6c66ce44f0/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/2748568e10349a3d43e78f2e2dbf2b5f409a6af5/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="cddcd0fb93bc70e27325f2f715b2710332004ebb">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_f3be5ff27b9e511995e6954947bb4ec692f2bcfb/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/26.0.0-alpha1/support-annotations-26.0.0-alpha1.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="023ee503b631f69511e335a061ea008f8da60f40">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/support-annotations-26.0.0-alpha1_99973a4260c10c5988f2020bc8b02e06be8a8118/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/de836179b55b740d0c2fa7f0126e83ad449e207b/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="952944218ecedea1554a513dec0c14d570642843">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_2880c6c6bfba0e15d60943cbd2e88674b7158ca2/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Ravelposh/.android/build-cache/7345501ebcdb3bbdbfabd13f1aac2606552b7ffe/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.2"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="/Users/Ravelposh/projects/apnea-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_d8c7c0ee5d95dc96d2d04e27f3d7613a81a1c36f/classes.dex" />
+    </item>
+
+</items>

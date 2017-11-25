@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Sleep APNEA</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_btdevice_list">BTDeviceList</string>
+    <string name="title_activity_found_device_list">FoundDeviceList</string>
+</resources>
