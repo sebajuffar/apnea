@@ -137,8 +137,7 @@ void loop() {
       case conectar:
         if ( !conectado ) {
           Serial.println("Conectado.");
-          BT.println(ACK_CONECTAR);
-          
+          BT.println(ACK_CONECTAR);        
           conectado = true;
         }
         break;
@@ -206,7 +205,9 @@ void loop() {
   #endif
   
   // =========================================== Envio de mensajes ==============================================
-  unsigned long timestamp = millis();
+  unsigned long timestampLong = millis();
+  char timestamp[50];
+  sprintf(timestamp, "%lu",timestampLong);
   if ( conectado ) {
     if ( estadoAlarma ) {
       BT.print(ALARMA);               // Etiqueta del mensaje
