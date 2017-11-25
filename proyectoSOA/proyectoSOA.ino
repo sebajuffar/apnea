@@ -1,20 +1,58 @@
 #include <OneWire.h>                 //Se importan las bibliotecas
 #include <DallasTemperature.h>
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
-SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+//============================= BLUETOOTH =================================================
+#define BTCONF 0              // Activa el envío de comandos AT por el Serial Monitor hacia el BT
+//#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
+//SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
+#include <AltSoftSerial.h>      // Usamos la biblioteca AltSoftSerial porque la que viene por defecto da ciertos problemas al enviar y recibir "al mismo tiempo"
+AltSoftSerial BT;             //AltSoftSerial usa 8 para RX y 9 para TX
+
+// Comandos que llegan por BT
+enum bt_msg {
+  conectar = '.',
+  desconectar = ',',
+  dormir = 'd',
+  despertarse = 'w',
+  pedir_pulso = 'p',
+  pedir_resp = 'r',
+  pedir_temp = 't'
+};
+
+// Etiquetas para los mensajes que salen por BT
+#define ACK_CONECTAR "CONECTADO"
+#define ACK_DESCONECTAR "DESCONECTADO"
+#define ACK_DORMIR "DORMIR"
+#define ACK_DESPERTAR "DESPERTAR"
+#define PULSO "PULSO"
+#define TEMP "TEMPERATURA"
+#define RESP "RESPIRACION"
+#define CALIBRANDO "CALIBRANDO"
+#define ALARMA "ALARMA"
+#define EMERGENCIA "EMERGENCIA"
+
+
+// Estados y opciones para BT
+bool conectado;
+bool durmiendo;
+bool reportarPulso;
+bool reportarRespiracion;
+bool reportarTemperatura;
+
+
+//============================= fin BLUETOOTH =================================================
+
 
 // Definición de pines
 #define potenciometro A0
-#define buzzer 8
+#define buzzer 10 //era 8
 #define ventilador 7
-#define led 9
+#define led 11 // era 9
 #define termometro 2
 #define sensorPulsasiones A1
 #define LED13 13
 
 // Definición de constantes
+#define tiempoEmergencia 17000
 #define intervaloIntensidadBuzzer 5000
 #define intervaloSegundosIntensidadBuzzer 2
 #define potenciometroEnRespiracion 25
@@ -52,6 +90,7 @@ int creceDecreceAnterior;
 long tiempoAnterior;
 long tiempoAnteriorLectura;
 long tiempoAnteriorAlarma;
+long tiempoInicioAlarma = 0;
 long tiempoPulsaciones;
 long tiempoEsperaBuzzer;
 long tiempoCambioIntensidad;
@@ -81,34 +120,147 @@ void setup() {
   tiempoAnterior = millis();
   tiempoAnteriorLectura = millis();
   tiempoPulsaciones=millis();
-  //Serial.begin(9600);
-  /////////////////////////////////////bluetooth////////////////////////////////////
-   BT.begin(9600);       // Inicializamos el puerto serie BT (Para Modo AT 2)
+  BT.begin(9600);       // Inicializamos el puerto serie BT (Para Modo AT 2)
   Serial.begin(115200);   // Inicializamos  el puerto serie 
-  ////////////////////////////////////////////////////////////////////////////////////
-  sensors.begin(); 
-  //Deberà sacarse cuando este el switch del bluetooth tendría que activarse cuando se llama a la función duerme
-  inicializaValoresCalibracion();
+  sensors.begin();      // Necesario para el sensor de temperatura
 }
 
 
 
 void loop() {
-////////////////////////////////bluetooth/////////////////////////////////////////////
- if(BT.available())    // Si llega un dato por el puerto BT se envía al monitor serial
+//==================================== Bluetooth =====================================
+//==================================== Recepción de mensajes ==============================
+ if(BT.available())    
   {
-    Serial.write(BT.read());
-  }
-  if(Serial.available())  // Si llega un dato por el monitor serial se envía al puerto BT
-  {
-     BT.write(Serial.read());
-  }
-/////////////////////////////////////////////////////////////////////////////////////
-  //TODO: poner un switch con los envios del bluetooth. y en cada caso hacer algo distinto.
-  //En el case Duerme se deberá inicializar la varialbe tiempoCalibracion.
-  duerme();
+    char msg = BT.read();   // Lee de a un byte
+    switch(msg) {
+      case conectar:
+        if ( !conectado ) {
+          Serial.println("Conectado.");
+          BT.println(ACK_CONECTAR);
+          
+          conectado = true;
+        }
+        break;
+      
+      case desconectar:
+        if ( conectado ) {
+          Serial.println("Desconectado.");
+          conectado = false;
+          reportarPulso = false;
+          reportarRespiracion = false;
+          reportarTemperatura = false;
+          BT.println(ACK_DESCONECTAR);
+        }
+        break;
+
+      case dormir:
+        if ( conectado && !durmiendo ) {          // Si se confirmó la conexión y todavía no estaba durmiendo, empieza la fase de sueño e inicializa la calibración. Si no, ignora.
+          durmiendo = true;
+          Serial.println("Comenzar fase de sueño.");
+          BT.println(ACK_DORMIR);
+          inicializaValoresCalibracion(); 
+        }
+        break;
+
+       case despertarse:
+        if ( conectado && durmiendo ) {         // Si se confirmó la conexión y estaba durmiendo, termina la fase de sueño. Si no, ignora.
+          durmiendo = false;
+          reportarRespiracion = false;
+          inicializaValoresCalibracion(); 
+          desactivarActuadores();
+          estadoAlarma = 0;
+          Serial.println("Finalizar fase de sueño.");
+          BT.println(ACK_DESPERTAR);
+          
+          
+        }
+        break;
+        
+      case pedir_pulso:
+        if ( conectado && !reportarPulso )
+          reportarPulso = true;
+        break;
+      case pedir_resp:
+      if ( conectado && !reportarRespiracion )
+          reportarRespiracion = true;
+        break;
+      case pedir_temp:
+      if ( conectado && !reportarTemperatura )
+          reportarTemperatura = true;
+        break;
+      default:
+        Serial.print("Comando desconocido: ");
+        Serial.println(msg);
+        break;
+    }
     
+    
+  }
   
+  #if BTCONFIG == 1
+    if(Serial.available())  // Si llega un dato por el monitor serial se envía al puerto BT
+    {
+       BT.write(Serial.read());
+    }
+  #endif
+  
+  // =========================================== Envio de mensajes ==============================================
+  unsigned long timestamp = millis();
+  if ( conectado ) {
+    if ( estadoAlarma ) {
+      BT.print(ALARMA);               // Etiqueta del mensaje
+      BT.print(":");                  // Separador
+      BT.println(timestamp);          // Timestamp + fin de linea
+    if ( (timestamp-tiempoInicioAlarma) > tiempoEmergencia ) {    //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
+      BT.print(EMERGENCIA);                           // Etiqueta del mensaje
+      BT.print(":");                                  // Separador
+      BT.println(timestamp);                          // Timestamp + fin de linea
+      }
+    }
+       
+    if ( reportarPulso ) {
+      BT.print(PULSO);                // Etiqueta del mensaje
+      BT.print(":");                  // Separador
+      BT.print(senialPulso);          // Valor de la señal
+      BT.print(":");                  // Separador
+      BT.println(timestamp);          // Timestamp + fin de linea
+    }
+    
+    if ( reportarRespiracion ) {
+      if ( sensorCalibrado ) {
+        BT.print(RESP);                 // Etiqueta del mensaje
+        BT.print(":");                  // Separador
+        BT.print(valorPotenciometro);   // Valor de la señal
+        BT.print(":");                  // Separador
+        BT.println(timestamp);          // Timestamp + fin de linea  
+      } else if ( durmiendo ) {                            // Sensor todavia no calibrado
+        BT.print(CALIBRANDO);           // Etiqueta del mensaje
+        BT.print(":");                  // Separador
+        BT.println(timestamp);          // Timestamp + fin de linea 
+      } else {
+        reportarRespiracion = false; 
+      }
+      
+      
+    }
+    
+    if ( reportarTemperatura ) {
+        BT.print(TEMP);                 // Etiqueta del mensaje
+        BT.print(":");                  // Separador
+        BT.print(temperatura);          // Valor de la señal
+        BT.print(":");                  // Separador
+        BT.println(timestamp);          // Timestamp + fin de linea
+        
+    }
+  }
+
+  //=============================== fin Bluetooth =============================================
+  
+  if ( durmiendo )    // Una vez activado el sueño no hace falta que siga conectado, por eso no pregunta por la conexion
+    duerme();
+  leePulsaciones();
+  leeTemperatura();
 }
 
 void duerme(){
@@ -124,6 +276,7 @@ void duerme(){
 
 
 void inicializaValoresCalibracion(){
+  tiempoInicioAlarma = 0;
   inicializoVectorInhalaExhala();
   sensorCalibrado=false;
   tiempoCalibracion=0;
@@ -262,10 +415,14 @@ void controlaSuenio(){
       //ACTIVO ALARMA
       estadoAlarma = 1;
       actualizaMarcaTiempo(&tiempoAnteriorAlarma);
+      if ( tiempoInicioAlarma == 0 ) {                          //Si es la primera vez que se prende(=0), se guarda el tiempo en el que se activó la alarma para luego consultar cuanto tiempo estuvo prendida
+        tiempoInicioAlarma = millis();        
+      }
       //Serial.println("asignar tiempoAnteriorAlarma1");
     } else {
       //DESACTIVO ALARMA
       estadoAlarma = 0;
+      tiempoInicioAlarma = 0;
     }
     actualizaMarcaTiempo(&tiempoAnterior);
   }
@@ -275,9 +432,7 @@ void controlaSuenio(){
   } else {
     desactivarActuadores();
   }
-  leePulsaciones();
-  leeTemperatura();
-  
+  /* NO VA EN LA VERSION FINAL
   BT.print("Tiempo: ");
   BT.print(millis());
   BT.print(", Pote: ");
@@ -286,6 +441,7 @@ void controlaSuenio(){
   BT.print(senialPulso);
   BT.print(", Temperatura: ");
   BT.println(temperatura);
+  */
 }
 
 // Verifica la respiración comparando con los parametros obtenidos en la calibración
