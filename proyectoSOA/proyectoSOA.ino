@@ -15,7 +15,8 @@ enum bt_msg {
   despertarse = 'w',
   pedir_pulso = 'p',
   pedir_resp = 'r',
-  pedir_temp = 't'
+  pedir_temp = 't',
+  prender_vent = 'v'
 };
 
 // Etiquetas para los mensajes que salen por BT
@@ -32,11 +33,12 @@ enum bt_msg {
 
 
 // Estados y opciones para BT
-bool conectado;
-bool durmiendo;
-bool reportarPulso;
-bool reportarRespiracion;
-bool reportarTemperatura;
+bool conectado = false;
+bool durmiendo = false;
+bool reportarPulso = false;
+bool reportarRespiracion = false;
+bool reportarTemperatura = false;
+bool prenderVentiladorBT = false;
 
 
 //============================= fin BLUETOOTH =================================================
@@ -182,12 +184,22 @@ void loop() {
           reportarPulso = true;
         break;
       case pedir_resp:
-      if ( conectado && !reportarRespiracion )
+        if ( conectado && !reportarRespiracion )
           reportarRespiracion = true;
         break;
       case pedir_temp:
-      if ( conectado && !reportarTemperatura )
+        if ( conectado && !reportarTemperatura )
           reportarTemperatura = true;
+        break;
+      case prender_vent:
+        if ( conectado ) {
+          prenderVentiladorBT = !prenderVentiladorBT;
+          if ( prenderVentiladorBT ) {
+            prenderVentilador();
+          } else {
+            apagarVentilador();
+          }
+        }
         break;
       default:
         Serial.print("Comando desconocido: ");
@@ -475,11 +487,20 @@ boolean respira(int valorActual) {
   //return  diferenciaTiempo <= intervaloSuperiorMediaRespiracion;
 }
 
+void prenderVentilador() { 
+  digitalWrite(ventilador, HIGH);
+}
+
+void apagarVentilador() {
+  if ( !prenderVentiladorBT && estadoAlarma == 0 )
+    digitalWrite(ventilador, LOW);
+}
+
 // Activa el ventilador, pone la alarma en intermitencia, enciende el led 
 void activarActuadores() {
   //Serial.println("Alarma activa = 1");
   //PRENDO EL VENTILADOR
-  digitalWrite(ventilador, HIGH);
+  prenderVentilador();
   activarEsperaBuzzer();
   
   //Serial.println(abs(millis() - tiempoAnteriorAlarma));
@@ -512,7 +533,7 @@ void desactivarActuadores() {
   //SI LA ALARMA NO ESTA ACTIVA, APAGO EL BUZZER, EL LED
   //Y EL VENTILADOR
   digitalWrite(led, LOW);
-  digitalWrite(ventilador, LOW);
+  apagarVentilador();
   noTone(buzzer);
   esperaBuzzerActiva = 0;
   intensidadAlarma = 65535;
