@@ -44,59 +44,27 @@ public class ConexionBluetooth implements Runnable {
 
     @Override
     public void run() {
-        /*
-        Looper.prepare();
-        h = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                switch (msg.what) {
-                    case RECIEVE_MESSAGE:													// if receive massage
-                        byte[] readBuf = (byte[]) msg.obj;
-                        String strIncom = new String(readBuf, 0, msg.arg1);					// create string from bytes array
-                        sb.append(strIncom);												// append string
-                        int endOfLineIndex = sb.indexOf("\r\n");							// determine the end-of-line
-                        if (endOfLineIndex > 0) { 											// if end-of-line,
-                            String sbprint = sb.substring(0, endOfLineIndex);				// extract string
-                            sb.delete(0, sb.length());										// and clear
-                            Log.d("Conexión Bluetooth", "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
-                        }
-                        break;
-                }
-            };
-        };
-        */
-        byte[] buffer = new byte[256];  // buffer store for the stream
-        int bytes; // bytes returned from read()
-        // Keep listening to the InputStream until an exception occurs
-        Log.d("Thread bt:","Loopea");
-
+        Log.d("ThreadBT","Inicio");
         while (true) {
-                leeLinea();
+            Log.d("ThreadBT","Loopea");
+            String linea = leeLinea();
+            Log.d("ThreadBT","Leyó: " + linea);
         }
     }
 
     public String leeLinea(){
         String linea = new String("");
-        try{
+        try {
             if (inputStream != null && inputStream.available() > 0) {
-                //bytes= inputStream.read(buffer,0,5);        // Get number of bytes and message in "buffer"
-                linea= bufferedReader.readLine();
-                Log.d("Treadbtlectura:",linea);
+                linea = bufferedReader.readLine();
             }
-            }
-        catch (IOException e) {
+        } catch (IOException e) {
             return e.getMessage();
         }
         return linea;
     }
 
-    public void dormir(){
-        try {
-            outputStream.write("d".getBytes());
-        }
-        catch (IOException e) {
-            return;
-        }
-    }
+
 
     public void desconectar()
     {
@@ -117,74 +85,67 @@ public class ConexionBluetooth implements Runnable {
         }
     }
 
+    private void enviarDatos(String mensaje){
+        if(outputStream != null) {
+            try {
+                outputStream.write(mensaje.getBytes());
+            } catch (IOException e) {
+                return;
+            }
+        }
+    }
+
+    public void dormir(){
+        enviarDatos("d");
+    }
     public void despertar()
     {
         enviarDatos("w");
     }
-
-    private void enviarDatos(String mensaje){
-            if(outputStream != null) {
-                try {
-                    outputStream.write(mensaje.getBytes());
-                } catch (IOException e) {
-                    return;
-                }
-            }
-    }
-
-    public void  pedirRespiracion(){
+    public void pedirRespiracion(){
         enviarDatos("r");
     }
-    public void  pedirPulso(){
+    public void pedirPulso(){
         enviarDatos("p");
     }
-
-
-    public boolean parsearMensajes() {
-        byte[] buffer = new byte[256];
-        while(true)  {
-            Log.d("ThreadBT","Arranco el thread");
-            if ( inputStream != null ) {
-                try {
-                    Log.d("ThreadBT","Leyó algo.");
-                    int cant;
-                    cant = inputStream.read(buffer, 0, 500);
-                    String recibido = new String(buffer, 0, cant);
-                    String mensajes[] = recibido.split("\n");
-                    for ( String mensaje : mensajes) {
-                        Log.d("ThreadBT","Lei " + mensaje);
-                        String info[] = mensaje.split(":");
-                        switch (info[0]) {
-                            case "CONECTADO":
-                                Log.d("BT","Se conecto el apnea.");
-                                break;
-                            case "DESCONECTADO":
-                                break;
-                            case "DORMIR":
-                                break;
-                            case "DESPERTAR":
-                                break;
-                            case "PULSO":
-                                break;
-                            case "TEMPERATURA":
-                                break;
-                            case "RESPIRACION":
-                                break;
-                            case "CALIBRANDO":
-                                break;
-                            case "ALARMA":
-                                break;
-                            case "EMERGENCIA":
-                                break;
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public void pedirTemperatura(){
+        enviarDatos("t");
     }
+    public void switchVentilador() { enviarDatos("v"); }
+
+
+    public boolean parsearMensaje(String linea) {
+        String []args = linea.split(":");
+        Log.d("ThreadBT", "Lei " + args[0]);
+        switch (args[0]) {
+            case "CONECTADO":
+                Log.d("BT", "Se conecto el apnea.");
+                break;
+            case "DESCONECTADO":
+                break;
+            case "DORMIR":
+                break;
+            case "DESPERTAR":
+                break;
+            case "PULSO":
+                break;
+            case "TEMPERATURA":
+                break;
+            case "RESPIRACION":
+                break;
+            case "CALIBRANDO":
+                break;
+            case "ALARMA":
+                break;
+            case "EMERGENCIA":
+                break;
+            default:
+                Log.d("ThreadBT", "Mensaje desconocido: "+ args[0]);
+            }
+        return true;
+    }
+
+
 
     public Set<BluetoothDevice> getDispositivosVinculados() {
         if ( mBluetoothAdapter == null ) {
