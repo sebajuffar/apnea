@@ -22,6 +22,8 @@ public class ConexionBluetooth implements Runnable {
     Handler h;
     final int RECIEVE_MESSAGE = 1;
     private StringBuilder sb = new StringBuilder();
+    private static Thread hilo = null;
+    private boolean flagConectado = false;
 
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
@@ -35,20 +37,16 @@ public class ConexionBluetooth implements Runnable {
         }
     }
 
-    private void empezarComunicacion() {
-    }
-
-    private void pararComunicacion() {
-    }
-
-
     @Override
     public void run() {
         Log.d("ThreadBT","Inicio");
         while (true) {
             Log.d("ThreadBT","Loopea");
             String linea = leeLinea();
+            if (Thread.currentThread().isInterrupted())
+                return;
             Log.d("ThreadBT","Leyó: " + linea);
+            parsearMensaje(linea);
         }
     }
 
@@ -65,27 +63,32 @@ public class ConexionBluetooth implements Runnable {
     }
 
 
-
-    public void desconectar()
-    {
+    private void desconectar() {
         try {
-            enviarDatos(",");
             if ( estaConectado() ) {
                 inputStream.close();
                 outputStream.close();
                 btSocket.close();
             }
         } catch (Exception e) {
-
         } finally {
             inputStream = null;
             outputStream = null;
             btSocket = null;
             dispositivoConectado = null;
+            flagConectado = false;
+            finalizarThread();
         }
     }
 
-    private void enviarDatos(String mensaje){
+    private void finalizarThread() {
+        if (hilo != null) {
+            hilo.interrupt();
+            hilo = null;
+        }
+    }
+
+    private void enviarDatos(String mensaje) {
         if(outputStream != null) {
             try {
                 outputStream.write(mensaje.getBytes());
@@ -95,6 +98,7 @@ public class ConexionBluetooth implements Runnable {
         }
     }
 
+    public void pedirDesconexion() { enviarDatos(","); }
     public void dormir(){
         enviarDatos("d");
     }
@@ -119,9 +123,13 @@ public class ConexionBluetooth implements Runnable {
         Log.d("ThreadBT", "Lei " + args[0]);
         switch (args[0]) {
             case "CONECTADO":
+                flagConectado = true;
                 Log.d("BT", "Se conecto el apnea.");
                 break;
             case "DESCONECTADO":
+                if ( flagConectado )
+                    desconectar();
+                Log.d("BT", "Se desconecto el apnea.");
                 break;
             case "DORMIR":
                 break;
@@ -191,6 +199,8 @@ public class ConexionBluetooth implements Runnable {
     }
 
     public void conectarDispositivo(BluetoothDevice device) {
+        pedirDesconexion();
+        flagConectado = false;
         dispositivoConectado = device;
         try {
             btSocket = dispositivoConectado.createInsecureRfcommSocketToServiceRecord(myUUID);
@@ -198,18 +208,19 @@ public class ConexionBluetooth implements Runnable {
             btSocket.connect();
             inputStream = btSocket.getInputStream();
             outputStream = btSocket.getOutputStream();
-            outputStream.write(".".getBytes());
             inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
+            enviarDatos(".");
         } catch (IOException e) {
-            e.printStackTrace();
+            desconectar();
+            return;
         }
         lanzarThreads();
     }
 
     private void lanzarThreads() {
-        Thread threadBluetooth = new Thread(this);
-        threadBluetooth.start();
+        hilo = new Thread(this);
+        hilo.start();
     }
 
     public boolean estaConectado() {
@@ -232,16 +243,6 @@ public class ConexionBluetooth implements Runnable {
             return dispositivoConectado.getAddress();
         }
         return "";
-    }
-
-    public void send(String msj) throws IOException {
-        outputStream.write(msj.toString().getBytes());
-    }
-
-    public String receive() throws IOException {
-        String resultado = null;
-        inputStream.read();
-        return resultado;
     }
 
 }

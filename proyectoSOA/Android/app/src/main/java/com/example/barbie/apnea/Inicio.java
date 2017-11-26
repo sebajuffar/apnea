@@ -154,7 +154,7 @@ public class Inicio extends AppCompatActivity {
         if(appEncendida == false){
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
             conexionBluetooth.despertar();
-            conexionBluetooth.desconectar();
+            conexionBluetooth.pedirDesconexion();
         }
     }
 
