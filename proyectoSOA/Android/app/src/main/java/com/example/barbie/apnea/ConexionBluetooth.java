@@ -53,7 +53,7 @@ public class ConexionBluetooth implements Runnable {
     public String leeLinea(){
         String linea = new String("");
         try {
-            if (inputStream != null && inputStream.available() > 0) {
+            if ( inputStream != null ) {
                 linea = bufferedReader.readLine();
             }
         } catch (IOException e) {
@@ -127,25 +127,49 @@ public class ConexionBluetooth implements Runnable {
                 Log.d("BT", "Se conecto el apnea.");
                 break;
             case "DESCONECTADO":
-                if ( flagConectado )
+                if ( flagConectado )        //else era basura
                     desconectar();
                 Log.d("BT", "Se desconecto el apnea.");
                 break;
             case "DORMIR":
+                if ( flagConectado ){
+
+                }
                 break;
             case "DESPERTAR":
+                if ( flagConectado ){
+
+                }
                 break;
             case "PULSO":
+                if ( flagConectado ){
+
+                }
                 break;
             case "TEMPERATURA":
+                if ( flagConectado ){
+
+                }
                 break;
             case "RESPIRACION":
+                if ( flagConectado ){
+
+                }
                 break;
             case "CALIBRANDO":
+                if ( flagConectado ){
+
+                }
                 break;
             case "ALARMA":
+                if ( flagConectado ){
+
+                }
                 break;
             case "EMERGENCIA":
+                if ( flagConectado ){
+
+                }
                 break;
             default:
                 Log.d("ThreadBT", "Mensaje desconocido: "+ args[0]);
@@ -210,12 +234,12 @@ public class ConexionBluetooth implements Runnable {
             outputStream = btSocket.getOutputStream();
             inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
+            lanzarThreads();
             enviarDatos(".");
         } catch (IOException e) {
             desconectar();
             return;
         }
-        lanzarThreads();
     }
 
     private void lanzarThreads() {

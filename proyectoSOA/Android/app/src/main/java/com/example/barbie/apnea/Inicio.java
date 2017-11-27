@@ -1,8 +1,10 @@
 package com.example.barbie.apnea;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.support.annotation.MainThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -21,16 +23,16 @@ public class Inicio extends AppCompatActivity {
     private Button btn_comenzar;
     private Button btn_detener;
     private Button btn_reportes;
-    public static BluetoothDevice dispositivoVinculado;
-
+    private static Reporte reporteActual;
     private static volatile ConexionBluetooth conexionBluetooth;
     private static Thread threadBluetooth;
+    private static PowerManager powerManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.appEncendida = false;
-        this.dispositivoVinculado = null;
+        this.powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         setContentView(R.layout.activity_inicio);
         btn_comenzar = (Button)findViewById(R.id.btn_comenzar);
         btn_detener = (Button)findViewById(R.id.btn_detener);
@@ -59,6 +61,13 @@ public class Inicio extends AppCompatActivity {
 
         configurarThread();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (conexionBluetooth != null && conexionBluetooth.estaConectado())
+            conexionBluetooth.pedirDesconexion();
+        super.onDestroy();
     }
 
     private void configurarThread() {
@@ -168,5 +177,9 @@ public class Inicio extends AppCompatActivity {
 
     public static ConexionBluetooth getConexionBluetooth() {
         return conexionBluetooth;
+    }
+
+    public static PowerManager getPowerManager() {
+        return powerManager;
     }
 }
