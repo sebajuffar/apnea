@@ -24,6 +24,7 @@ public class ConexionBluetooth implements Runnable {
     private StringBuilder sb = new StringBuilder();
     private static Thread hilo = null;
     private boolean flagConectado = false;
+    private Reporte reporte;
 
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
@@ -134,12 +135,13 @@ public class ConexionBluetooth implements Runnable {
             case "DORMIR":
                 if ( flagConectado ){
                     // TODO: Deberia apagar la pantalla / ir a otro activity
-
+                    reporte = new Reporte();
+                    Inicio.setReporteActual(reporte);
                 }
                 break;
             case "DESPERTAR":
                 if ( flagConectado ){
-
+                    reporte.guardar();
                 }
                 break;
             case "PULSO":
