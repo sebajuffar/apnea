@@ -27,6 +27,8 @@ public class Inicio extends AppCompatActivity {
     private static volatile ConexionBluetooth conexionBluetooth;
     private static Thread threadBluetooth;
     private static PowerManager powerManager;
+    private static Context context;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class Inicio extends AppCompatActivity {
             }
         });
 
+        context = getApplicationContext();
         configurarThread();
 
     }
@@ -179,7 +182,18 @@ public class Inicio extends AppCompatActivity {
         return conexionBluetooth;
     }
 
+    public static Context getContext() {
+        return context;
+    }
     public static PowerManager getPowerManager() {
         return powerManager;
+    }
+
+    public static void setReporteActual(Reporte reporte) {
+        reporteActual = reporte;
+    }
+
+    public static Reporte getReporteActual() {
+        return reporteActual;
     }
 }

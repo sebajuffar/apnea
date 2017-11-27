@@ -174,8 +174,6 @@ void loop() {
           estadoAlarma = 0;
           Serial.println("Finalizar fase de sueño.");
           BT.println(ACK_DESPERTAR);
-          
-          
         }
         break;
         

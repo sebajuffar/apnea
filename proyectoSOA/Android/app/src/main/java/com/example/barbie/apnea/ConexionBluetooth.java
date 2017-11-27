@@ -133,6 +133,7 @@ public class ConexionBluetooth implements Runnable {
                 break;
             case "DORMIR":
                 if ( flagConectado ){
+                    // TODO: Deberia apagar la pantalla / ir a otro activity
 
                 }
                 break;
