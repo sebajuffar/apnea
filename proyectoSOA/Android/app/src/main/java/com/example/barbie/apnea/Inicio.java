@@ -4,6 +4,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.PowerManager;
 import android.support.annotation.MainThread;
 import android.support.v7.app.AlertDialog;
@@ -17,7 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class Inicio extends AppCompatActivity {
+public class Inicio extends AppCompatActivity implements SensorEventListener {
 
     public static Boolean appEncendida;
     private Button btn_comenzar;
@@ -28,6 +32,10 @@ public class Inicio extends AppCompatActivity {
     private static Thread threadBluetooth;
     private static PowerManager powerManager;
     private static Context context;
+
+    private SensorManager mSensorManager;
+    private DatosSensores datosSensores;
+
 
 
     @Override
@@ -62,7 +70,10 @@ public class Inicio extends AppCompatActivity {
         });
 
         context = getApplicationContext();
+
         configurarThread();
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        datosSensores = new DatosSensores();
 
     }
 
@@ -96,13 +107,19 @@ public class Inicio extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //Log.d("Inicio", "ejecute onResume");
+        escucharSensores();
         if(conexionBluetooth.estaConectado()) {
             Toast.makeText(this,"Conectado a: " + conexionBluetooth.nombreDispositivo(), Toast.LENGTH_SHORT ).show();
             setTitle("Sleep APNEA [" + conexionBluetooth.nombreDispositivo() + "]");
         } else {
             setTitle("Sleep APNEA");
         }
+    }
+
+    @Override
+    protected void onPause() {
+        pararSensores();
+        super.onPause();
     }
 
     //Se hizo click en alguna de las opciones del menu... dependiendo de cual, se va a proceder
@@ -154,12 +171,10 @@ public class Inicio extends AppCompatActivity {
     }
 
     //Acciones de los botones principales
-    public void onClickComenzar(View view){
-        if(appEncendida == false){
-            Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
-        }else
-            Toast.makeText(this, "Aplicacion encendida", Toast.LENGTH_SHORT).show();
-            conexionBluetooth.dormir();
+    public void onClickComenzar(View view) {
+        if (!datosSensores.luzAceptable())
+            Toast.makeText(this, "Se recomiendan valores de luz más bajos", Toast.LENGTH_LONG).show();
+        conexionBluetooth.dormir();
     }
 
     public void onClickDetener(View view){
@@ -195,5 +210,38 @@ public class Inicio extends AppCompatActivity {
 
     public static Reporte getReporteActual() {
         return reporteActual;
+    }
+
+    private void escucharSensores() {
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),   SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT),           SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    private void pararSensores() {
+        mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT));
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        synchronized (this) {
+            switch (sensorEvent.sensor.getType() ) {
+                case Sensor.TYPE_ACCELEROMETER:
+                    datosSensores.setAcelerometro(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+                    if (conexionBluetooth.estaConectado() && datosSensores.huboShake()) {
+                         Log.d("Sensores","Prendo Ventilador");
+                        conexionBluetooth.switchVentilador();
+                    }
+                    break;
+                case Sensor.TYPE_LIGHT:
+                    datosSensores.setLuz(sensorEvent.values[0]);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        return;
     }
 }
