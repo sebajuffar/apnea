@@ -29,7 +29,9 @@
             android:name=".FoundDeviceList"
             android:label="@string/title_activity_found_device_list"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Grafico"></activity>
+        <activity android:name=".Grafico">
+
+        </activity>
     </application>
 
 </manifest>
