@@ -18,6 +18,9 @@ public class Reporte {
     private Map<Long,Long> mapPulso;
     private Map<Long,Double> mapTemperatura;
 
+    private static File archivoActual;
+
+
     public Reporte() {
         context = Inicio.getContext();
         listaOffsetMillis = new ArrayList<>();
@@ -69,6 +72,7 @@ public class Reporte {
                 }
             }
             fileOutputStream.close();
+            archivoActual = archivo;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,5 +156,9 @@ public class Reporte {
         if( !listaOffsetMillis.contains(offset) )
             listaOffsetMillis.add(offset);
         listaOffsetsAlarmas.add(offset);
+    }
+
+    public static File getArchivoActual() {
+        return archivoActual;
     }
 }
