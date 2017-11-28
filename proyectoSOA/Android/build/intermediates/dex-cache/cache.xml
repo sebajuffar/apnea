@@ -3,21 +3,21 @@
 
     <item
         is-multidex="true"
-        jar="D:\Programas\SOA\apnea\proyectoSOA\Android\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jar="C:\Users\g.a.rodriguez\Documents\apnea\proyectoSOA\Android\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
         jumboMode="true"
         optimize="true"
         revision="26.0.2"
-        sha1="7ba5e487cfd4c52a1cbd7bdb766c36a7d1f8afee">
-        <dex dex="D:\Programas\SOA\apnea\proyectoSOA\Android\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_916eefc58840a6d9e51b78f7ed8e3577f4350682\classes.dex" />
+        sha1="a525f38420221fb5ed56dcc32843978fdccff907">
+        <dex dex="C:\Users\g.a.rodriguez\Documents\apnea\proyectoSOA\Android\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_4e64d18bdedc6dc4596a2f49b7f7151f28de6dce\classes.dex" />
     </item>
     <item
         is-multidex="true"
-        jar="D:\Programas\SOA\apnea\proyectoSOA\Android\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jar="C:\Users\g.a.rodriguez\Documents\apnea\proyectoSOA\Android\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
         jumboMode="true"
         optimize="true"
         revision="26.0.2"
         sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
-        <dex dex="D:\Programas\SOA\apnea\proyectoSOA\Android\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_3b6478458d25d775368cd76ba8ef653be2ff50f1\classes.dex" />
+        <dex dex="C:\Users\g.a.rodriguez\Documents\apnea\proyectoSOA\Android\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_39380df0cc9758421af764ac974a0568a651b93e\classes.dex" />
     </item>
 
 </items>

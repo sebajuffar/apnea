@@ -102,6 +102,9 @@ public class ConexionBluetooth implements Runnable {
     public void pedirDesconexion() { enviarDatos(","); }
     public void dormir(){
         enviarDatos("d");
+        pedirPulso();
+        pedirRespiracion();
+        pedirTemperatura();
     }
     public void despertar()
     {
@@ -145,23 +148,23 @@ public class ConexionBluetooth implements Runnable {
                 }
                 break;
             case "PULSO":
-                if ( flagConectado ){
-
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
                 }
                 break;
             case "TEMPERATURA":
-                if ( flagConectado ){
-
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarTemperatura(Double.parseDouble(args[1]), Long.parseLong(args[2]));
                 }
                 break;
             case "RESPIRACION":
-                if ( flagConectado ){
-
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarRespiracion(Long.parseLong(args[1]), Long.parseLong(args[2]));
                 }
                 break;
             case "CALIBRANDO":
-                if ( flagConectado ){
-
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarRespiracion(0L, Long.parseLong(args[1]));
                 }
                 break;
             case "ALARMA":

@@ -1,6 +1,7 @@
 package com.example.barbie.apnea;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.*;
 import java.util.*;
@@ -38,20 +39,30 @@ public class Reporte {
         FileOutputStream outputStream;
         File path = context.getFilesDir();
         try {
-            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            //outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
+            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            File archivo = new File(path, filename);
+            FileOutputStream fileOutputStream = new FileOutputStream(archivo);
             for ( Long offset : listaOffsetMillis ) {
+                Log.d("Escritura","Escribo linea");
                 Double temperatura = mapTemperatura.get(offset);
                 Long pulso = mapPulso.get(offset);
                 Long respiracion = mapRespiracion.get(offset);
                 StringBuilder linea = new StringBuilder();
                 linea.append(millisAFechaYHora(offset));
-                linea.append("\t" + temperatura.toString());
-                linea.append("\t" + pulso.toString());
-                linea.append("\t" + respiracion.toString());
+                linea.append("\t");
+                if ( temperatura != null ) linea.append(temperatura.toString());
+                linea.append("\t");
+                if ( pulso != null ) linea.append(pulso.toString());
+                linea.append("\t");
+                if ( respiracion !=null ) linea.append(respiracion.toString());
                 linea.append(System.lineSeparator());
-                outputStream.write(linea.toString().getBytes());
+                //outputStreamWriter.write(linea.toString());
+                fileOutputStream.write(linea.toString().getBytes());
             }
-            outputStream.close();
+            //outputStreamWriter.close();
+            //outputStream.close();
+            fileOutputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +80,7 @@ public class Reporte {
         gc.setTimeInMillis(tiempo.longValue()+tiempoInicio);
 
         String fecha = String.format(new Locale("es","AR"),
-                "%04d/%02d/%02d %0d:%0d:%0d",
+                "%04d/%02d/%02d %02d:%02d:%02d",
                 gc.get(GregorianCalendar.YEAR),
                 gc.get(GregorianCalendar.MONTH) + 1,
                 gc.get(GregorianCalendar.DAY_OF_MONTH),
