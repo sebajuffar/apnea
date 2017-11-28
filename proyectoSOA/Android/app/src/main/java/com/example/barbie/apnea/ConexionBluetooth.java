@@ -58,6 +58,7 @@ public class ConexionBluetooth implements Runnable {
                 linea = bufferedReader.readLine();
             }
         } catch (IOException e) {
+            desconectar();
             return e.getMessage();
         }
         return linea;
@@ -169,12 +170,12 @@ public class ConexionBluetooth implements Runnable {
                 break;
             case "ALARMA":
                 if ( flagConectado ){
-
+                    reporte.cargarAlarma(Long.parseLong(args[1]));
                 }
                 break;
             case "EMERGENCIA":
                 if ( flagConectado ){
-
+                    reporte.cargarEmergencia(Long.parseLong(args[1]));
                 }
                 break;
             default:

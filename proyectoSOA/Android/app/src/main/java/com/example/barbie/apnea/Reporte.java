@@ -12,6 +12,8 @@ public class Reporte {
     private long tiempoInicio = 0;
 
     private List<Long> listaOffsetMillis;
+    private List<Long> listaOffsetsAlarmas;
+    private List<Long> listaOffsetsEmergencias;
     private Map<Long,Long> mapRespiracion;
     private Map<Long,Long> mapPulso;
     private Map<Long,Double> mapTemperatura;
@@ -19,6 +21,8 @@ public class Reporte {
     public Reporte() {
         context = Inicio.getContext();
         listaOffsetMillis = new ArrayList<>();
+        listaOffsetsAlarmas = new ArrayList<>();
+        listaOffsetsEmergencias = new ArrayList<>();
         mapPulso = new HashMap<>();
         mapRespiracion = new HashMap<>();
         mapTemperatura = new HashMap<>();
@@ -36,37 +40,46 @@ public class Reporte {
         );
 
         String filename = fecha + "-REPORTE.csv";
-        FileOutputStream outputStream;
-        File path = context.getFilesDir();
+        File path = new File("/sdcard/reportes-apnea/");
+        path.mkdirs();
         try {
-            //outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
-            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
             File archivo = new File(path, filename);
-            FileOutputStream fileOutputStream = new FileOutputStream(archivo);
+            FileOutputStream fileOutputStream = new FileOutputStream(archivo, true);
+            path.mkdirs();
             for ( Long offset : listaOffsetMillis ) {
                 Log.d("Escritura","Escribo linea");
                 Double temperatura = mapTemperatura.get(offset);
                 Long pulso = mapPulso.get(offset);
                 Long respiracion = mapRespiracion.get(offset);
                 StringBuilder linea = new StringBuilder();
-                linea.append(millisAFechaYHora(offset));
-                linea.append("\t");
-                if ( temperatura != null ) linea.append(temperatura.toString());
-                linea.append("\t");
-                if ( pulso != null ) linea.append(pulso.toString());
-                linea.append("\t");
-                if ( respiracion !=null ) linea.append(respiracion.toString());
-                linea.append(System.lineSeparator());
-                //outputStreamWriter.write(linea.toString());
-                fileOutputStream.write(linea.toString().getBytes());
+                if (listaOffsetsEmergencias.contains(offset))
+                    linea.append(millisAFechaYHora(offset)+"\t!!!"+"\t!!!"+"\t!!!"+System.lineSeparator());
+                else if (listaOffsetsAlarmas.contains(offset))
+                    linea.append(millisAFechaYHora(offset)+"\t!"+"\t!"+"\t!"+System.lineSeparator());
+
+                if ( temperatura != null || pulso != null || respiracion != null ) {
+                    linea.append(millisAFechaYHora(offset));
+                    linea.append("\t");
+                    if ( temperatura != null ) linea.append(temperatura.toString());
+                    linea.append("\t");
+                    if ( pulso != null ) linea.append(pulso.toString());
+                    linea.append("\t");
+                    if ( respiracion !=null ) linea.append(respiracion.toString());
+                    linea.append(System.getProperty("line.separator"));
+                }
             }
-            //outputStreamWriter.close();
-            //outputStream.close();
             fileOutputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        millisInicio = 0;
+        tiempoInicio = 0;
+        listaOffsetMillis.clear();
+        listaOffsetsAlarmas.clear();
+        listaOffsetsEmergencias.clear();
+        mapRespiracion.clear();
+        mapPulso.clear();
+        mapTemperatura.clear();
     }
 
     private Long getOffsetMillis(long millisArduino) {
@@ -123,4 +136,21 @@ public class Reporte {
         mapRespiracion.put(offset,Long.valueOf(respiracion));
     }
 
+    public void cargarEmergencia(long millis) {
+        if ( tiempoInicio == 0 || millisInicio == 0 )
+            inicializarTiempo(millis);
+        Long offset = getOffsetMillis(millis);
+        if( !listaOffsetMillis.contains(offset) )
+            listaOffsetMillis.add(offset);
+        listaOffsetsEmergencias.add(offset);
+    }
+
+    public void cargarAlarma(long millis) {
+        if ( tiempoInicio == 0 || millisInicio == 0 )
+            inicializarTiempo(millis);
+        Long offset = getOffsetMillis(millis);
+        if( !listaOffsetMillis.contains(offset) )
+            listaOffsetMillis.add(offset);
+        listaOffsetsAlarmas.add(offset);
+    }
 }
