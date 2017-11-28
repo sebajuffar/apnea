@@ -18,7 +18,7 @@ public class Reporte {
     private Map<Long,Long> mapPulso;
     private Map<Long,Double> mapTemperatura;
 
-    private static File archivoActual;
+    private File archivoActual;
 
 
     public Reporte() {
@@ -48,7 +48,7 @@ public class Reporte {
         try {
             File archivo = new File(path, filename);
             FileOutputStream fileOutputStream = new FileOutputStream(archivo, true);
-            path.mkdirs();
+            archivoActual = archivo;
             for ( Long offset : listaOffsetMillis ) {
                 Log.d("Escritura","Escribo linea");
                 Double temperatura = mapTemperatura.get(offset);
@@ -56,23 +56,25 @@ public class Reporte {
                 Long respiracion = mapRespiracion.get(offset);
                 StringBuilder linea = new StringBuilder();
                 if (listaOffsetsEmergencias.contains(offset))
-                    linea.append(millisAFechaYHora(offset)+"\t!!!"+"\t!!!"+"\t!!!"+System.lineSeparator());
+                    linea.append(millisAFechaYHora(offset)+",!!!"+",!!!"+",!!!"+System.lineSeparator());
                 else if (listaOffsetsAlarmas.contains(offset))
-                    linea.append(millisAFechaYHora(offset)+"\t!"+"\t!"+"\t!"+System.lineSeparator());
+                    linea.append(millisAFechaYHora(offset)+",!"+",!"+",!"+System.lineSeparator());
 
                 if ( temperatura != null || pulso != null || respiracion != null ) {
                     linea.append(millisAFechaYHora(offset));
-                    linea.append("\t");
+                    linea.append(",");
                     if ( temperatura != null ) linea.append(temperatura.toString());
-                    linea.append("\t");
+                    linea.append(",");
                     if ( pulso != null ) linea.append(pulso.toString());
-                    linea.append("\t");
+                    linea.append(",");
                     if ( respiracion !=null ) linea.append(respiracion.toString());
-                    linea.append(System.getProperty("line.separator"));
+                    linea.append(System.lineSeparator());
                 }
+                Log.d("Escritura","Escribo linea");
+                fileOutputStream.write(linea.toString().getBytes());
             }
+            Log.d("Escritura","Terminé de escribir");
             fileOutputStream.close();
-            archivoActual = archivo;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -158,7 +160,7 @@ public class Reporte {
         listaOffsetsAlarmas.add(offset);
     }
 
-    public static File getArchivoActual() {
+    public File getArchivoActual() {
         return archivoActual;
     }
 }
