@@ -32,7 +32,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
     private static Thread threadBluetooth;
     private static PowerManager powerManager;
     private static Context context;
-
+    private boolean botonDormir;
     private SensorManager mSensorManager;
     private DatosSensores datosSensores;
 
@@ -47,7 +47,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
         btn_comenzar = (Button)findViewById(R.id.btn_comenzar);
         btn_detener = (Button)findViewById(R.id.btn_detener);
         btn_reportes = (Button)findViewById(R.id.btn_reportes);
-
+        botonDormir = true;
         btn_comenzar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -172,17 +172,21 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
 
     //Acciones de los botones principales
     public void onClickComenzar(View view) {
-        if (!datosSensores.luzAceptable())
-            Toast.makeText(this, "Se recomiendan valores de luz más bajos", Toast.LENGTH_LONG).show();
-        conexionBluetooth.dormir();
+        if ( botonDormir ) {
+            botonDormir = false;
+            btn_comenzar.setText("DESPERTAR");
+            if (!datosSensores.luzAceptable())
+                Toast.makeText(this, "Se recomiendan valores de luz más bajos", Toast.LENGTH_LONG).show();
+            conexionBluetooth.dormir();
+        } else {
+            botonDormir = true;
+            btn_comenzar.setText("COMENZAR SUEÑO");
+            conexionBluetooth.despertar();
+        }
     }
 
     public void onClickDetener(View view){
-        if(appEncendida == false){
-            Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
-            conexionBluetooth.despertar();
-            conexionBluetooth.pedirDesconexion();
-        }
+        conexionBluetooth.pedirDesconexion();
     }
 
     public void onClickReportes(View view){

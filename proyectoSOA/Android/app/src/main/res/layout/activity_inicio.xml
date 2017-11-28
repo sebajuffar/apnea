@@ -25,8 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/btn_comenzar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp"
-        android:text="Detener" />
+        android:layout_marginTop="47dp"
+        android:text="Desconectar" />
 
     <Button
         android:id="@+id/btn_reportes"
@@ -37,8 +37,8 @@
 
         android:layout_below="@+id/btn_detener"
         android:layout_marginTop="45dp"
-        android:background="@color/colorPrimaryDark"
-        android:text="Ver último reporte"
+        android:background="@color/colorPrimary"
+        android:text="Monitoreo"
         android:textColor="@android:color/white" />
 
 </android.widget.RelativeLayout>
