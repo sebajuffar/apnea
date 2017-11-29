@@ -183,13 +183,9 @@ public class ECG extends Activity {
                             if (latestIndex % blipInteral == 0) {
                                 // insert a "blip" to simulate a heartbeat:
                                 int valorPulso=Integer.parseInt(pulso);
-                                if(valorPulso>700)
-                                {
-                                    data[latestIndex]=0;
-                                }
-                                else {
-                                    data[latestIndex] = Integer.parseInt(pulso);
-                                }
+
+                                data[latestIndex] = Integer.parseInt(pulso);
+
                             } else {
                                 // insert a random sample:
                                 data[latestIndex] = Integer.parseInt(pulso);

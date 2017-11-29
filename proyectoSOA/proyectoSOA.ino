@@ -2,7 +2,7 @@
 #include <DallasTemperature.h>
 //============================= BLUETOOTH =================================================
 #define BTCONF 0              // Activa el envío de comandos AT por el Serial Monitor hacia el BT
-//#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial  
+//#include <SoftwareSerial.h>   // Incluimos la librería  SoftwareSerial
 //SoftwareSerial BT(10,11);    // Definimos los pines RX y TX del Arduino conectados al Bluetooth
 #include <AltSoftSerial.h>      // Usamos la biblioteca AltSoftSerial porque la que viene por defecto da ciertos problemas al enviar y recibir "al mismo tiempo"
 AltSoftSerial BT;             //AltSoftSerial usa 8 para RX y 9 para TX
@@ -61,7 +61,7 @@ bool prenderVentiladorBT = false;
 #define toleranciaPulso 550
 #define tiempoLecturaPulso 0.01
 #define toleranciaPotenciometro 100
-#define cantidadMuestrasRespiracion 10  
+#define cantidadMuestrasRespiracion 10
 #define maxTiempoCalibracion 100000000
 #define intervaloConfianza 0.05
 
@@ -115,35 +115,35 @@ DallasTemperature sensors(&ourWire); //Se llama a la librería DallasTemperature
 
 
 void setup() {
-  pinMode(LED13,OUTPUT);
+  pinMode(LED13, OUTPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(ventilador, OUTPUT);
   pinMode(led, OUTPUT);
   tiempoAnterior = millis();
   tiempoAnteriorLectura = millis();
-  tiempoPulsaciones=millis();
+  tiempoPulsaciones = millis();
   BT.begin(9600);       // Inicializamos el puerto serie BT (Para Modo AT 2)
-  Serial.begin(115200);   // Inicializamos  el puerto serie 
+  Serial.begin(115200);   // Inicializamos  el puerto serie
   sensors.begin();      // Necesario para el sensor de temperatura
 }
 
 
 
 void loop() {
-//==================================== Bluetooth =====================================
-//==================================== Recepción de mensajes ==============================
- if(BT.available())    
+  //==================================== Bluetooth =====================================
+  //==================================== Recepción de mensajes ==============================
+  if (BT.available())
   {
     char msg = BT.read();   // Lee de a un byte
-    switch(msg) {
+    switch (msg) {
       case conectar:
         if ( !conectado ) {
           Serial.println("Conectado.");
-          BT.println(ACK_CONECTAR);        
+          BT.println(ACK_CONECTAR);
           conectado = true;
         }
         break;
-      
+
       case desconectar:
         if ( conectado ) {
           Serial.println("Desconectado.");
@@ -161,22 +161,24 @@ void loop() {
           Serial.println("Comenzar fase de sueño.");
           BT.println(ACK_DORMIR);
           inicializaValoresCalibracion();
-          calibraSensorRespiracion(); 
+          calibraSensorRespiracion();
         }
         break;
 
-       case despertarse:
+      case despertarse:
         if ( conectado && durmiendo ) {         // Si se confirmó la conexión y estaba durmiendo, termina la fase de sueño. Si no, ignora.
           durmiendo = false;
           reportarRespiracion = false;
-          inicializaValoresCalibracion(); 
+          reportarPulso = false;
+          reportarTemperatura = false;
+          inicializaValoresCalibracion();
           estadoAlarma = 0;
           desactivarActuadores();
           Serial.println("Finalizar fase de sueño.");
           BT.println(ACK_DESPERTAR);
         }
         break;
-        
+
       case pedir_pulso:
         if ( conectado && !reportarPulso )
           reportarPulso = true;
@@ -204,33 +206,33 @@ void loop() {
         Serial.println(msg);
         break;
     }
-    
-    
+
+
   }
-  
-  #if BTCONFIG == 1
-    if(Serial.available())  // Si llega un dato por el monitor serial se envía al puerto BT
-    {
-       BT.write(Serial.read());
-    }
-  #endif
-  
+
+#if BTCONFIG == 1
+  if (Serial.available()) // Si llega un dato por el monitor serial se envía al puerto BT
+  {
+    BT.write(Serial.read());
+  }
+#endif
+
   // =========================================== Envio de mensajes ==============================================
   unsigned long timestampLong = millis();
   char timestamp[50];
-  sprintf(timestamp, "%lu",timestampLong);
+  sprintf(timestamp, "%lu", timestampLong);
   if ( conectado ) {
     if ( estadoAlarma ) {
       BT.print(ALARMA);               // Etiqueta del mensaje
       BT.print(":");                  // Separador
       BT.println(timestamp);          // Timestamp + fin de linea
-    if ( (timestampLong-tiempoInicioAlarma) > tiempoEmergencia ) {    //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
-      BT.print(EMERGENCIA);                           // Etiqueta del mensaje
-      BT.print(":");                                  // Separador
-      BT.println(timestamp);                          // Timestamp + fin de linea
+      if ( (timestampLong - tiempoInicioAlarma) > tiempoEmergencia ) {  //Si estuvo 17 segundos en modo alarma, entra en modo emergencia y envia el mensaje por bt
+        BT.print(EMERGENCIA);                           // Etiqueta del mensaje
+        BT.print(":");                                  // Separador
+        BT.println(timestamp);                          // Timestamp + fin de linea
       }
     }
-       
+
     if ( reportarPulso ) {
       BT.print(PULSO);                // Etiqueta del mensaje
       BT.print(":");                  // Separador
@@ -238,167 +240,167 @@ void loop() {
       BT.print(":");                  // Separador
       BT.println(timestamp);          // Timestamp + fin de linea
     }
-    
+
     if ( reportarRespiracion ) {
       if ( sensorCalibrado ) {
         BT.print(RESP);                 // Etiqueta del mensaje
         BT.print(":");                  // Separador
         BT.print(valorPotenciometro);   // Valor de la señal
         BT.print(":");                  // Separador
-        BT.println(timestamp);          // Timestamp + fin de linea  
+        BT.println(timestamp);          // Timestamp + fin de linea
       } else if ( durmiendo ) {                            // Sensor todavia no calibrado
         BT.print(CALIBRANDO);           // Etiqueta del mensaje
         BT.print(":");                  // Separador
-        BT.println(timestamp);          // Timestamp + fin de linea 
-      } else {
-        reportarRespiracion = false; 
-      }
-      
-      
-    }
-    
-    if ( reportarTemperatura ) {
-        BT.print(TEMP);                 // Etiqueta del mensaje
-        BT.print(":");                  // Separador
-        BT.print(temperatura);          // Valor de la señal
-        BT.print(":");                  // Separador
         BT.println(timestamp);          // Timestamp + fin de linea
-        
+      } else {
+        reportarRespiracion = false;
+      }
+
+
+    }
+
+    if ( reportarTemperatura ) {
+      BT.print(TEMP);                 // Etiqueta del mensaje
+      BT.print(":");                  // Separador
+      BT.print(temperatura);          // Valor de la señal
+      BT.print(":");                  // Separador
+      BT.println(timestamp);          // Timestamp + fin de linea
+
     }
   }
 
   //=============================== fin Bluetooth =============================================
-  
+
   if ( durmiendo )    // Una vez activado el sueño no hace falta que siga conectado, por eso no pregunta por la conexion
     duerme();
   leePulsaciones();
   leeTemperatura();
 }
 
-void duerme(){
-  if(!sensorCalibrado){ 
+void duerme() {
+  if (!sensorCalibrado) {
     calibraSensorRespiracion();
-    
+
   }
-  else{
+  else {
 
     controlaSuenio();
   }
 }
 
 
-void inicializaValoresCalibracion(){
+void inicializaValoresCalibracion() {
   tiempoInicioAlarma = 0;
   inicializoVectorInhalaExhala();
-  sensorCalibrado=false;
-  creceDecreceAnterior=0;
-  contadorMuestrasRespiracion=0;
-  mediaTiempoRespiracion=0;
+  sensorCalibrado = false;
+  creceDecreceAnterior = 0;
+  contadorMuestrasRespiracion = 0;
+  mediaTiempoRespiracion = 0;
   actualizaMarcaTiempo(&tiempoCalibracion);
-  valorPotenciometroAnteriorAuxiliarMedia=0;
-  desvioTiempoRespiracion=0;
-  sensorCalibrado=0;
+  valorPotenciometroAnteriorAuxiliarMedia = 0;
+  desvioTiempoRespiracion = 0;
+  sensorCalibrado = 0;
   Serial.println("Calibrando Sensor Respiración");
 }
 
-//calibra el sensor de respiracion con la media de tiempo entre de inhalar y exhalar se toman x muestras en y minutos. 
-void calibraSensorRespiracion(){
-  if(!sensorCalibrado){ 
-    if(lapsoTiempo(tiempoCalibracion, maxTiempoCalibracion)){
-        Serial.println(":)");
-        calculaDatosEstadisticos();
-        
+//calibra el sensor de respiracion con la media de tiempo entre de inhalar y exhalar se toman x muestras en y minutos.
+void calibraSensorRespiracion() {
+  if (!sensorCalibrado) {
+    if (lapsoTiempo(tiempoCalibracion, maxTiempoCalibracion)) {
+      Serial.println(":)");
+      calculaDatosEstadisticos();
+
     }
-    else{
-        leerPotenciometro();
-        int    diferenciaPotenciometro=valorPotenciometro-valorPotenciometroAnteriorAuxiliarMedia;
-        valorPotenciometroAnteriorAuxiliarMedia=valorPotenciometro;
-        //Guarda 1 o -1, si crece o decrece   
-        creceDecrece=diferenciaPotenciometro!=0?diferenciaPotenciometro/abs(diferenciaPotenciometro):creceDecrece;
-        if(creceDecrece!=creceDecreceAnterior){
-            Serial.println("Cambio");
-            Serial.println(valorPotenciometro);
-            Serial.println(diferenciaPotenciometro);
-            creceDecreceAnterior=creceDecrece;
-            muestrasTiempoRespiracion[contadorMuestrasRespiracion]=millis();
-            contadorMuestrasRespiracion++;
-            //Serial.println("Contador:");
-            //Serial.println(contadorMuestrasRespiracion);
-            if(contadorMuestrasRespiracion>=cantidadMuestrasRespiracion)
-            {
-                Serial.println("1");
-                calculaDatosEstadisticos();
-            }
+    else {
+      leerPotenciometro();
+      int    diferenciaPotenciometro = valorPotenciometro - valorPotenciometroAnteriorAuxiliarMedia;
+      valorPotenciometroAnteriorAuxiliarMedia = valorPotenciometro;
+      //Guarda 1 o -1, si crece o decrece
+      creceDecrece = diferenciaPotenciometro != 0 ? diferenciaPotenciometro / abs(diferenciaPotenciometro) : creceDecrece;
+      if (creceDecrece != creceDecreceAnterior) {
+        Serial.println("Cambio");
+        Serial.println(valorPotenciometro);
+        Serial.println(diferenciaPotenciometro);
+        creceDecreceAnterior = creceDecrece;
+        muestrasTiempoRespiracion[contadorMuestrasRespiracion] = millis();
+        contadorMuestrasRespiracion++;
+        //Serial.println("Contador:");
+        //Serial.println(contadorMuestrasRespiracion);
+        if (contadorMuestrasRespiracion >= cantidadMuestrasRespiracion)
+        {
+          Serial.println("1");
+          calculaDatosEstadisticos();
         }
-    } 
+      }
+    }
   }
 }
 
 void calculaDatosEstadisticos()
 {
-  sensorCalibrado=true;
+  sensorCalibrado = true;
   calculaMediaTiempoRespiracion();
   calcularDesvioTiempoRespiracion();
-  calcularParametrosConfianza();  
+  calcularParametrosConfianza();
 }
 
 
-void calculaMediaTiempoRespiracion(){
-  for(int i=0;i<contadorMuestrasRespiracion-1;i++){
-    long tiempo1=muestrasTiempoRespiracion[i];
-    long tiempo2=muestrasTiempoRespiracion[i+1];
-    long diferencia=tiempo2-tiempo1;
-    mediaTiempoRespiracion+=diferencia;
-  }    
-   
-    mediaTiempoRespiracion=mediaTiempoRespiracion/contadorMuestrasRespiracion;
-    Serial.println("La media de respiración es:");
-    int segundos= (((mediaTiempoRespiracion % day) % hour) % minute) / second;
-    Serial.println(segundos);
-}
-
-void calcularDesvioTiempoRespiracion(){
-  long acum=0;
-  long diferencia;
-  for(int i=0;i<contadorMuestrasRespiracion;i++){
-    long tiempo1=muestrasTiempoRespiracion[i];
-    diferencia=tiempo1-mediaTiempoRespiracion;
-    diferencia=diferencia*diferencia;
-    acum+=diferencia;
+void calculaMediaTiempoRespiracion() {
+  for (int i = 0; i < contadorMuestrasRespiracion - 1; i++) {
+    long tiempo1 = muestrasTiempoRespiracion[i];
+    long tiempo2 = muestrasTiempoRespiracion[i + 1];
+    long diferencia = tiempo2 - tiempo1;
+    mediaTiempoRespiracion += diferencia;
   }
-  
-  acum=acum/(contadorMuestrasRespiracion-1);
-  acum=sqrt(acum);
-  desvioTiempoRespiracion=abs(acum);
-  Serial.println("El desvío de respiración es:");
-  int segundos= (((desvioTiempoRespiracion % day) % hour) % minute) / second;
+
+  mediaTiempoRespiracion = mediaTiempoRespiracion / contadorMuestrasRespiracion;
+  Serial.println("La media de respiración es:");
+  int segundos = (((mediaTiempoRespiracion % day) % hour) % minute) / second;
   Serial.println(segundos);
 }
 
-void calcularParametrosConfianza(){
-  float aux=intervaloConfianza/2;
+void calcularDesvioTiempoRespiracion() {
+  long acum = 0;
+  long diferencia;
+  for (int i = 0; i < contadorMuestrasRespiracion; i++) {
+    long tiempo1 = muestrasTiempoRespiracion[i];
+    diferencia = tiempo1 - mediaTiempoRespiracion;
+    diferencia = diferencia * diferencia;
+    acum += diferencia;
+  }
+
+  acum = acum / (contadorMuestrasRespiracion - 1);
+  acum = sqrt(acum);
+  desvioTiempoRespiracion = abs(acum);
+  Serial.println("El desvío de respiración es:");
+  int segundos = (((desvioTiempoRespiracion % day) % hour) % minute) / second;
+  Serial.println(segundos);
+}
+
+void calcularParametrosConfianza() {
+  float aux = intervaloConfianza / 2;
   //z-1
   //TODO ver como sacar de la tabla normal. Existe alguna libreria??
-  float zM1 =1.96;
-  intervaloInferiorMediaRespiracion=mediaTiempoRespiracion-(zM1*desvioTiempoRespiracion/sqrt(contadorMuestrasRespiracion));
-  intervaloSuperiorMediaRespiracion=mediaTiempoRespiracion+(zM1*desvioTiempoRespiracion/sqrt(contadorMuestrasRespiracion));
+  float zM1 = 1.96;
+  intervaloInferiorMediaRespiracion = mediaTiempoRespiracion - (zM1 * desvioTiempoRespiracion / sqrt(contadorMuestrasRespiracion));
+  intervaloSuperiorMediaRespiracion = mediaTiempoRespiracion + (zM1 * desvioTiempoRespiracion / sqrt(contadorMuestrasRespiracion));
   Serial.println("Intervalo");
-  int segundos= (((intervaloInferiorMediaRespiracion % day) % hour) % minute) / second;
+  int segundos = (((intervaloInferiorMediaRespiracion % day) % hour) % minute) / second;
   Serial.println(segundos);
-  segundos= (((intervaloSuperiorMediaRespiracion % day) % hour) % minute) / second;
+  segundos = (((intervaloSuperiorMediaRespiracion % day) % hour) % minute) / second;
   Serial.println(segundos);
 }
 
-void inicializoVectorInhalaExhala(){
-  for(int i=0;i<cantidadMuestrasRespiracion;i++)
+void inicializoVectorInhalaExhala() {
+  for (int i = 0; i < cantidadMuestrasRespiracion; i++)
   {
-    muestrasTiempoRespiracion[i]=0;  
+    muestrasTiempoRespiracion[i] = 0;
   }
 }
-//controla el sueño determina si activar los actuadores que despiertan 
-void controlaSuenio(){
-   //leerPotenciometro();
-  
+//controla el sueño determina si activar los actuadores que despiertan
+void controlaSuenio() {
+  //leerPotenciometro();
+
   //Serial.println(diferenciaValorPotenciometro);
   //CADA MEDIO SEGUNDO CONTROLO SI EL POTENCIOMETRO SUFRE MOVIMIENTO
   if (lapsoTiempo(tiempoAnteriorAlarma, 0.5)) {
@@ -417,7 +419,7 @@ void controlaSuenio(){
       Serial.println("No respira");
       huboMovimiento = 0;
     }
-   
+
     actualizaMarcaTiempo(&tiempoAnteriorLectura);
   }
 
@@ -430,7 +432,7 @@ void controlaSuenio(){
       estadoAlarma = 1;
       actualizaMarcaTiempo(&tiempoAnteriorAlarma);
       if ( tiempoInicioAlarma == 0 ) {                          //Si es la primera vez que se prende(=0), se guarda el tiempo en el que se activó la alarma para luego consultar cuanto tiempo estuvo prendida
-        tiempoInicioAlarma = millis();        
+        tiempoInicioAlarma = millis();
       }
       //Serial.println("asignar tiempoAnteriorAlarma1");
     } else {
@@ -440,21 +442,21 @@ void controlaSuenio(){
     }
     actualizaMarcaTiempo(&tiempoAnterior);
   }
-  
+
   if (estadoAlarma) {
     activarActuadores();
   } else {
     desactivarActuadores();
   }
   /* NO VA EN LA VERSION FINAL
-  BT.print("Tiempo: ");
-  BT.print(millis());
-  BT.print(", Pote: ");
-  BT.print(valorPotenciometro);
-  BT.print(", Pulso: ");
-  BT.print(senialPulso);
-  BT.print(", Temperatura: ");
-  BT.println(temperatura);
+    BT.print("Tiempo: ");
+    BT.print(millis());
+    BT.print(", Pote: ");
+    BT.print(valorPotenciometro);
+    BT.print(", Pulso: ");
+    BT.print(senialPulso);
+    BT.print(", Temperatura: ");
+    BT.println(temperatura);
   */
 }
 
@@ -463,19 +465,19 @@ void controlaSuenio(){
 // @var valorActual es el valor actual del potenciómetro
 boolean respira(int valorActual) {
   leerPotenciometro();
-  int diferenciaPotenciometro=valorPotenciometro-valorPotenciometroAnteriorAuxiliarMedia;
-  valorPotenciometroAnteriorAuxiliarMedia=valorPotenciometro;
-  //Guarda 1 o -1, si crece o decrece   
-  creceDecrece=diferenciaPotenciometro!=0?diferenciaPotenciometro/abs(diferenciaPotenciometro):creceDecrece;
+  int diferenciaPotenciometro = valorPotenciometro - valorPotenciometroAnteriorAuxiliarMedia;
+  valorPotenciometroAnteriorAuxiliarMedia = valorPotenciometro;
+  //Guarda 1 o -1, si crece o decrece
+  creceDecrece = diferenciaPotenciometro != 0 ? diferenciaPotenciometro / abs(diferenciaPotenciometro) : creceDecrece;
   Serial.println("Crece");
   Serial.println(creceDecrece);
-  if(creceDecrece!=creceDecreceAnterior){
-     creceDecreceAnterior=creceDecrece;
-     actualizaMarcaTiempo(&marcaTiempoRespira);
+  if (creceDecrece != creceDecreceAnterior) {
+    creceDecreceAnterior = creceDecrece;
+    actualizaMarcaTiempo(&marcaTiempoRespira);
   }
-  
 
-  long diferenciaTiempo=millis()-marcaTiempoRespira;
+
+  long diferenciaTiempo = millis() - marcaTiempoRespira;
   Serial.println("Diferencia de tiempo");
   Serial.println(diferenciaTiempo);
   return diferenciaTiempo >= intervaloInferiorMediaRespiracion && diferenciaTiempo <= intervaloSuperiorMediaRespiracion;
@@ -484,7 +486,7 @@ boolean respira(int valorActual) {
   //return  diferenciaTiempo <= intervaloSuperiorMediaRespiracion;
 }
 
-void prenderVentilador() { 
+void prenderVentilador() {
   digitalWrite(ventilador, HIGH);
 }
 
@@ -493,15 +495,15 @@ void apagarVentilador() {
     digitalWrite(ventilador, LOW);
 }
 
-// Activa el ventilador, pone la alarma en intermitencia, enciende el led 
+// Activa el ventilador, pone la alarma en intermitencia, enciende el led
 void activarActuadores() {
   //Serial.println("Alarma activa = 1");
   //PRENDO EL VENTILADOR
   prenderVentilador();
   activarEsperaBuzzer();
-  
+
   //Serial.println(abs(millis() - tiempoAnteriorAlarma));
- 
+
   //EL FLAG "sonarAlarma" PASA DE 1 A -1 CADA 700 MILISEGUNDOS
   //PARA QUE EL PITIDO Y LA LUZ DEL LED SEA INTERMITENTE
   if (lapsoTiempo(tiempoAnteriorAlarma, 0.7)) {
@@ -509,9 +511,9 @@ void activarActuadores() {
     actualizaMarcaTiempo(&tiempoAnteriorAlarma);
     //Serial.println("asignar tiempoAnteriorAlarma2");
   }
-  
+
   // INTERMITENCIA
-  if (lapsoTiempo(tiempoEsperaBuzzer,3)) {
+  if (lapsoTiempo(tiempoEsperaBuzzer, 3)) {
     if (sonarAlarma > 0) {
       tone(buzzer, obtenerIntensidadAlarma());
       digitalWrite(led, HIGH);
@@ -520,7 +522,7 @@ void activarActuadores() {
       noTone(buzzer);
       digitalWrite(led, LOW);
       //Serial.println("No suena");
-    }  
+    }
   }
 }
 
@@ -557,21 +559,21 @@ void cambiarEstadoActuador(int *actuador, int estado) {
 }
 
 
-void leePulsaciones(){
+void leePulsaciones() {
   senialPulso = analogRead(sensorPulsasiones);
-  //Serial.println(senialPulso);                    
-  if(lapsoTiempo(tiempoPulsaciones,tiempoLecturaPulso)) {
-    if(senialPulso > toleranciaPulso){
-      digitalWrite(LED13,HIGH);  
-      tiempoPulsaciones=millis();
+  //Serial.println(senialPulso);
+  if (lapsoTiempo(tiempoPulsaciones, tiempoLecturaPulso)) {
+    if (senialPulso > toleranciaPulso) {
+      digitalWrite(LED13, HIGH);
+      tiempoPulsaciones = millis();
     } else {
-      digitalWrite(LED13,LOW); 
-      tiempoPulsaciones=millis();    
+      digitalWrite(LED13, LOW);
+      tiempoPulsaciones = millis();
     }
   }
 }
 
-void leeTemperatura(){
+void leeTemperatura() {
   sensors.requestTemperatures();       //Prepara el sensor para la lectura
   temperatura = sensors.getTempCByIndex(0); //Se lee e imprime la temperatura en grados Centigrados
 }

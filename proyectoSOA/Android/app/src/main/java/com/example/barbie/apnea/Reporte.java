@@ -36,14 +36,17 @@ public class Reporte {
         gCalendar.setTimeInMillis(tiempoInicio);
 
         String fecha = String.format(new Locale("es","AR"),
-                "%d-%02d-%02d",
+                "%d-%02d-%02d-%d:%02d:%02d",
                 gCalendar.get(GregorianCalendar.YEAR),
                 gCalendar.get(GregorianCalendar.MONTH) + 1,
-                gCalendar.get(GregorianCalendar.DAY_OF_MONTH)
+                gCalendar.get(GregorianCalendar.DAY_OF_MONTH),
+                gCalendar.get(GregorianCalendar.HOUR_OF_DAY),
+                gCalendar.get(GregorianCalendar.MINUTE),
+                gCalendar.get(GregorianCalendar.SECOND)
         );
 
         String filename = fecha + "-REPORTE.csv";
-        File path = new File("/sdcard/reportes-apnea/");
+        File path = new File("/storage/self/primary/DCIM/");
         path.mkdirs();
         try {
             File archivo = new File(path, filename);
@@ -131,6 +134,7 @@ public class Reporte {
         if( !listaOffsetMillis.contains(offset) )
             listaOffsetMillis.add(offset);
         mapPulso.put(offset,Long.valueOf(pulso));
+
     }
 
     public void cargarRespiracion(long respiracion, long millis) {

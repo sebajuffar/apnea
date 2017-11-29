@@ -160,10 +160,12 @@ public class ConexionBluetooth implements Runnable {
                 break;
             case "PULSO":
                 if ( flagConectado ){
+                    Log.d("Antes de llamar a","pulsoParaGraficar");
                     if ( pulsoParaGraficar ) {
                         addPulsoBuffer(args[1]);
                     } else if ( reporte != null ) {
                         reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
+
                     }
                 }
                 break;
@@ -293,6 +295,7 @@ public class ConexionBluetooth implements Runnable {
     }
 
     private void addPulsoBuffer(String pulso){
+        Log.d("AddPulsoBuffer",pulso);
         bufferPulso.add(pulso);
 
     }

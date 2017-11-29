@@ -25,8 +25,8 @@ public class DatosSensores {
         altitud = latitud = 0;
     }
 
-    synchronized public void setLuz(float lum) {
-
+    synchronized public void setLuz(float luminosidad) {
+        this.lum = luminosidad;
     }
     synchronized public void setAcelerometro(float x, float y, float z) {
         this.x = x;
