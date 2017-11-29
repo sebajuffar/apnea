@@ -8,6 +8,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.PowerManager;
 import android.support.annotation.MainThread;
 import android.support.v7.app.AlertDialog;
@@ -21,7 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class Inicio extends AppCompatActivity implements SensorEventListener {
+public class Inicio extends AppCompatActivity implements SensorEventListener, LocationListener {
 
     public static Boolean appEncendida;
     private Button btn_comenzar;
@@ -34,7 +36,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
     private static Context context;
     private boolean botonDormir;
     private SensorManager mSensorManager;
-    private DatosSensores datosSensores;
+    private static DatosSensores datosSensores;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -258,5 +260,30 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
         return;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        datosSensores.setLatitud(location.getLatitude());
+        datosSensores.setLatitud(location.getAltitude());
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
+
+    public static DatosSensores getDatosSensores() {
+        return datosSensores;
     }
 }

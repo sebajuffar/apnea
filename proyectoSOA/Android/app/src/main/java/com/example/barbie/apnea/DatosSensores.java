@@ -9,6 +9,8 @@ public class DatosSensores {
     private float lum;
     DecimalFormat dosdecimales = new DecimalFormat("###.###");
     private static final float lumAceptables = 20;
+    private double altitud;
+    private double latitud;
 
     private double aceleracionAnterior = 0;
     private double acumulacionDiferencias = 0;
@@ -17,6 +19,7 @@ public class DatosSensores {
 
     public DatosSensores() {
         x = y = z = lum = 0;
+        altitud = latitud = 0;
     }
 
     synchronized public void setLuz(float lum) {
@@ -47,6 +50,22 @@ public class DatosSensores {
     synchronized public double getNorma() {
         double norma = Math.sqrt(x*x+y*y+z*z);
         return norma;
+    }
+
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+
+    public void setAltitud(double altitud) {
+        this.altitud = altitud;
+    }
+
+    public double getLatitud() {
+        return latitud;
+    }
+
+    public double getAltitud() {
+        return altitud;
     }
 
     synchronized public String toString() {

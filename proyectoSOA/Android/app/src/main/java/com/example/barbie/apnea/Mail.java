@@ -52,6 +52,7 @@ public class Mail {
         properties.setProperty("mail.smtp.quitwait", "false");
 
         try{
+            String msg = mensaje;
             session= Session.getDefaultInstance(properties, new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -64,9 +65,14 @@ public class Mail {
                 messaje.setSubject("Reporte Sleep-Apnea");
                 messaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse ("medico.sleepapnea@gmail.com"));
 
+                double latitud = Inicio.getDatosSensores().getLatitud();
+                double altitud = Inicio.getDatosSensores().getAltitud();
+                if ( latitud != 0 && altitud != 0 )
+                    msg = msg + System.lineSeparator() + "Ubicación: " + latitud + "°, " + altitud + "°"+ System.lineSeparator();
+
                 // Agrego el texto
                 BodyPart messageBodyPart = new MimeBodyPart();
-                messageBodyPart.setText(mensaje);
+                messageBodyPart.setText(msg);
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
 
