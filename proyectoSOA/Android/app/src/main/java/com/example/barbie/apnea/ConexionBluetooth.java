@@ -24,6 +24,7 @@ public class ConexionBluetooth implements Runnable {
     private StringBuilder sb = new StringBuilder();
     private static Thread hilo = null;
     private boolean flagConectado = false;
+    private Reporte reporte;
 
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
@@ -53,10 +54,11 @@ public class ConexionBluetooth implements Runnable {
     public String leeLinea(){
         String linea = new String("");
         try {
-            if (inputStream != null && inputStream.available() > 0) {
+            if ( inputStream != null ) {
                 linea = bufferedReader.readLine();
             }
         } catch (IOException e) {
+            desconectar();
             return e.getMessage();
         }
         return linea;
@@ -101,6 +103,9 @@ public class ConexionBluetooth implements Runnable {
     public void pedirDesconexion() { enviarDatos(","); }
     public void dormir(){
         enviarDatos("d");
+        pedirPulso();
+        pedirRespiracion();
+        pedirTemperatura();
     }
     public void despertar()
     {
@@ -127,25 +132,51 @@ public class ConexionBluetooth implements Runnable {
                 Log.d("BT", "Se conecto el apnea.");
                 break;
             case "DESCONECTADO":
-                if ( flagConectado )
+                if ( flagConectado )        //else era basura
                     desconectar();
                 Log.d("BT", "Se desconecto el apnea.");
                 break;
             case "DORMIR":
+                if ( flagConectado ){
+                    // TODO: Deberia apagar la pantalla / ir a otro activity
+                    reporte = new Reporte();
+                    Inicio.setReporteActual(reporte);
+                }
                 break;
             case "DESPERTAR":
+                if ( flagConectado ){
+                    reporte.guardar();
+                }
                 break;
             case "PULSO":
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
+                }
                 break;
             case "TEMPERATURA":
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarTemperatura(Double.parseDouble(args[1]), Long.parseLong(args[2]));
+                }
                 break;
             case "RESPIRACION":
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarRespiracion(Long.parseLong(args[1]), Long.parseLong(args[2]));
+                }
                 break;
             case "CALIBRANDO":
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarRespiracion(0L, Long.parseLong(args[1]));
+                }
                 break;
             case "ALARMA":
+                if ( flagConectado ){
+                    reporte.cargarAlarma(Long.parseLong(args[1]));
+                }
                 break;
             case "EMERGENCIA":
+                if ( flagConectado ){
+                    reporte.cargarEmergencia(Long.parseLong(args[1]));
+                }
                 break;
             default:
                 Log.d("ThreadBT", "Mensaje desconocido: "+ args[0]);
@@ -210,12 +241,12 @@ public class ConexionBluetooth implements Runnable {
             outputStream = btSocket.getOutputStream();
             inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
+            lanzarThreads();
             enviarDatos(".");
         } catch (IOException e) {
             desconectar();
             return;
         }
-        lanzarThreads();
     }
 
     private void lanzarThreads() {

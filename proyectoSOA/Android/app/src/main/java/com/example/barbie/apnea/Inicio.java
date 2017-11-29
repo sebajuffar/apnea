@@ -1,8 +1,14 @@
 package com.example.barbie.apnea;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.PowerManager;
 import android.support.annotation.MainThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,27 +21,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class Inicio extends AppCompatActivity {
+public class Inicio extends AppCompatActivity implements SensorEventListener {
 
     public static Boolean appEncendida;
     private Button btn_comenzar;
     private Button btn_detener;
     private Button btn_reportes;
-    public static BluetoothDevice dispositivoVinculado;
-
+    private static Reporte reporteActual;
     private static volatile ConexionBluetooth conexionBluetooth;
     private static Thread threadBluetooth;
+    private static PowerManager powerManager;
+    private static Context context;
+    private boolean botonDormir;
+    private SensorManager mSensorManager;
+    private DatosSensores datosSensores;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.appEncendida = false;
-        this.dispositivoVinculado = null;
+        this.powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         setContentView(R.layout.activity_inicio);
         btn_comenzar = (Button)findViewById(R.id.btn_comenzar);
         btn_detener = (Button)findViewById(R.id.btn_detener);
         btn_reportes = (Button)findViewById(R.id.btn_reportes);
-
+        botonDormir = true;
         btn_comenzar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -57,8 +69,19 @@ public class Inicio extends AppCompatActivity {
             }
         });
 
-        configurarThread();
+        context = getApplicationContext();
 
+        configurarThread();
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        datosSensores = new DatosSensores();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (conexionBluetooth != null && conexionBluetooth.estaConectado())
+            conexionBluetooth.pedirDesconexion();
+        super.onDestroy();
     }
 
     private void configurarThread() {
@@ -84,13 +107,19 @@ public class Inicio extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //Log.d("Inicio", "ejecute onResume");
+        escucharSensores();
         if(conexionBluetooth.estaConectado()) {
             Toast.makeText(this,"Conectado a: " + conexionBluetooth.nombreDispositivo(), Toast.LENGTH_SHORT ).show();
             setTitle("Sleep APNEA [" + conexionBluetooth.nombreDispositivo() + "]");
         } else {
             setTitle("Sleep APNEA");
         }
+    }
+
+    @Override
+    protected void onPause() {
+        pararSensores();
+        super.onPause();
     }
 
     //Se hizo click en alguna de las opciones del menu... dependiendo de cual, se va a proceder
@@ -147,21 +176,22 @@ public class Inicio extends AppCompatActivity {
     }
 
     //Acciones de los botones principales
-    public void onClickComenzar(View view){
-
-        /*if(appEncendida == false){
-            Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
-        }else
-            Toast.makeText(this, "Aplicacion encendida", Toast.LENGTH_SHORT).show();
-            conexionBluetooth.dormir();*/
+    public void onClickComenzar(View view) {
+        if ( botonDormir ) {
+            botonDormir = false;
+            btn_comenzar.setText("DESPERTAR");
+            if (!datosSensores.luzAceptable())
+                Toast.makeText(this, "Se recomiendan valores de luz más bajos", Toast.LENGTH_LONG).show();
+            conexionBluetooth.dormir();
+        } else {
+            botonDormir = true;
+            btn_comenzar.setText("COMENZAR SUEÑO");
+            conexionBluetooth.despertar();
+        }
     }
 
     public void onClickDetener(View view){
-        if(appEncendida == false){
-            Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
-            conexionBluetooth.despertar();
-            conexionBluetooth.pedirDesconexion();
-        }
+        conexionBluetooth.pedirDesconexion();
     }
 
     public void onClickReportes(View view){
@@ -174,5 +204,53 @@ public class Inicio extends AppCompatActivity {
 
     public static ConexionBluetooth getConexionBluetooth() {
         return conexionBluetooth;
+    }
+
+    public static Context getContext() {
+        return context;
+    }
+    public static PowerManager getPowerManager() {
+        return powerManager;
+    }
+
+    public static void setReporteActual(Reporte reporte) {
+        reporteActual = reporte;
+    }
+
+    public static Reporte getReporteActual() {
+        return reporteActual;
+    }
+
+    private void escucharSensores() {
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),   SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT),           SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    private void pararSensores() {
+        mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT));
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        synchronized (this) {
+            switch (sensorEvent.sensor.getType() ) {
+                case Sensor.TYPE_ACCELEROMETER:
+                    datosSensores.setAcelerometro(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+                    if (conexionBluetooth.estaConectado() && datosSensores.huboShake()) {
+                         Log.d("Sensores","Prendo Ventilador");
+                        conexionBluetooth.switchVentilador();
+                    }
+                    break;
+                case Sensor.TYPE_LIGHT:
+                    datosSensores.setLuz(sensorEvent.values[0]);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        return;
     }
 }
