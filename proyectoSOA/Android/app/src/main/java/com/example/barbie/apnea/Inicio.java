@@ -1,6 +1,6 @@
 package com.example.barbie.apnea;
 
-import android.bluetooth.BluetoothDevice;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,8 +10,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.PowerManager;
-import android.support.annotation.MainThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +37,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     private boolean botonDormir;
     private SensorManager mSensorManager;
     private static DatosSensores datosSensores;
+    private LocationManager mLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
 
         configurarThread();
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         datosSensores = new DatosSensores();
 
     }
@@ -114,6 +116,12 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     protected void onResume() {
         super.onResume();
         escucharSensores();
+        try {
+            //mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+        } catch (SecurityException e) {
+            Toast.makeText(this,"Error al obtener permisos de localización", Toast.LENGTH_SHORT).show();
+        }
         if(conexionBluetooth.estaConectado()) {
             Toast.makeText(this,"Conectado a: " + conexionBluetooth.nombreDispositivo(), Toast.LENGTH_SHORT ).show();
             setTitle("Sleep APNEA [" + conexionBluetooth.nombreDispositivo() + "]");
@@ -125,6 +133,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     protected void onPause() {
         pararSensores();
+        mLocationManager.removeUpdates(this);
         super.onPause();
     }
 
@@ -264,6 +273,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d("GPS","Actualice posicion");
         datosSensores.setLatitud(location.getLatitude());
         datosSensores.setLatitud(location.getAltitude());
     }
