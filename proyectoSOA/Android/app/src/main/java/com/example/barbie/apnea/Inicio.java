@@ -132,6 +132,11 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(intent);
         }
+        if (id==R.id.menuItemEcg) {
+            Intent intent = new Intent(this, ECG.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            this.startActivity(intent);
+        }
         /*if (id==R.id.opcion2) {
             Toast.makeText(this,"Se seleccionó la segunda opción",Toast.LENGTH_LONG).show();
         }
