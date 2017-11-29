@@ -76,7 +76,7 @@ public class Mail {
                     String filename = archivo.getPath();
                     DataSource source = new FileDataSource(filename);
                     messageBodyPart.setDataHandler(new DataHandler(source));
-                    messageBodyPart.setFileName(filename);
+                    messageBodyPart.setFileName(archivo.getName());
                     multipart.addBodyPart(messageBodyPart);
                 }
                 messaje.setContent(multipart);
