@@ -29,6 +29,12 @@
             android:name=".FoundDeviceList"
             android:label="@string/title_activity_found_device_list"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".ECG"
+            android:label="@string/app_name">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 
