@@ -38,6 +38,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +50,10 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
         btn_reportes = (Button)findViewById(R.id.btn_reportes);
         botonDormir = true;
         btn_comenzar.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
+                if(conexionBluetooth.estaConectado())
                 onClickComenzar(view);
             }
         });
@@ -61,6 +64,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
                 onClickDetener(view);
             }
         });
+
 
         btn_reportes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,8 +105,9 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_opciones, menu);
-        return true;
+       return true;
     }
+
 
     @Override
     protected void onResume() {

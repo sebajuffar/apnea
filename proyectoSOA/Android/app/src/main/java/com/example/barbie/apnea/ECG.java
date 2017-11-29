@@ -19,11 +19,14 @@ package com.example.barbie.apnea;
 import android.app.Activity;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.widget.TextView;
+
 import com.androidplot.Plot;
 import com.androidplot.util.Redrawer;
 import com.androidplot.xy.*;
 
 import java.lang.ref.*;
+import java.util.Random;
 
 /**
  * An example of a real-time plot displaying an asynchronously updated model of ECG data.  There are three
@@ -39,11 +42,15 @@ import java.lang.ref.*;
  */
 public class ECG extends Activity {
     private XYPlot plot;
+    static Double temperatura;
+    private TextView editTextTemp;
+    private Thread t;
 
     /**
      * Uses a separate thread to modulate redraw frequency.
      */
     private Redrawer redrawer;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -51,7 +58,7 @@ public class ECG extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ecg);
         Inicio.getConexionBluetooth().pedirPulsoParaGraficar();
-
+        editTextTemp = (TextView)findViewById(R.id.editTextTemp);
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
 
@@ -72,6 +79,28 @@ public class ECG extends Activity {
 
         // set a redraw rate of 30hz and start immediately:
         redrawer = new Redrawer(plot, 30, true);
+        temperatura = 0D;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                while(true){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            editTextTemp.setText(round(temperatura,2).toString() + " °C");
+                        }
+                    });
+                    Thread.sleep(1500);
+
+                }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
     }
 
     /**
@@ -217,5 +246,11 @@ public class ECG extends Activity {
     public void onStop() {
         super.onStop();
         redrawer.finish();
+    }
+
+    //Para que la temperatura muestre 2 digitos decimales nada mas
+    public Double round(Double value, int digits) {
+        Double scale = Math.pow(10, digits);
+        return Math.round(value * scale) / scale;
     }
 }
