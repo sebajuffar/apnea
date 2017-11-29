@@ -2,7 +2,6 @@ package com.example.barbie.apnea;
 
 import android.bluetooth.*;
 import android.os.*;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 
@@ -29,7 +28,7 @@ public class ConexionBluetooth implements Runnable {
 
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
-    private Queue<String> bufferPulso;
+
 
     public ConexionBluetooth() throws Exception {
         //Se inicializa el manejador del adaptador bluetooth
@@ -117,7 +116,6 @@ public class ConexionBluetooth implements Runnable {
     }
     public void pedirPulso(){
         enviarDatos("p");
-        bufferPulso=new ArrayDeque<>() ;
     }
     public void pedirTemperatura(){
         enviarDatos("t");
@@ -142,7 +140,7 @@ public class ConexionBluetooth implements Runnable {
                 if ( flagConectado ){
                     // TODO: Deberia apagar la pantalla / ir a otro activity
                     reporte = new Reporte();
-                    //Inicio.setReporteActual(reporte);
+                    Inicio.setReporteActual(reporte);
                 }
                 break;
             case "DESPERTAR":
@@ -151,9 +149,8 @@ public class ConexionBluetooth implements Runnable {
                 }
                 break;
             case "PULSO":
-                if ( flagConectado ){
-                    //reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
-                    addPulsoBuffer(args[1]);
+                if ( flagConectado && reporte != null ){
+                    reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
                 }
                 break;
             case "TEMPERATURA":
@@ -183,7 +180,7 @@ public class ConexionBluetooth implements Runnable {
                 break;
             default:
                 Log.d("ThreadBT", "Mensaje desconocido: "+ args[0]);
-        }
+            }
         return true;
     }
 
@@ -267,7 +264,7 @@ public class ConexionBluetooth implements Runnable {
     public String nombreDispositivo() {
         if (estaConectado()) {
             return dispositivoConectado.getName();
-        }
+    }
         return "";
     }
 
@@ -278,16 +275,5 @@ public class ConexionBluetooth implements Runnable {
         }
         return "";
     }
-    private void addPulsoBuffer(String pulso){
-        bufferPulso.add(pulso);
-
-    }
-    public String leePuslo(){
-        if(bufferPulso.isEmpty())
-            return "0";
-        else
-            return bufferPulso.poll();
-    }
-
 
 }

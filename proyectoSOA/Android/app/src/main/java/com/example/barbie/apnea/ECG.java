@@ -19,9 +19,6 @@ package com.example.barbie.apnea;
 import android.app.Activity;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.androidplot.Plot;
 import com.androidplot.util.Redrawer;
 import com.androidplot.xy.*;
@@ -38,8 +35,7 @@ import java.lang.ref.*;
  * The alternative is to try synchronously invoking {@link Plot#redraw()} within whatever system is updating
  * the model, which would severely degrade performance.
  *
- * 3 - The plot is set to render using a background thread via config attr in  R.layout.ecg.xml.
- * This ensures that the rest of the app will remain responsive during rendering.
+ * 3 - The plot is set to render using a background thread via config attr in  R.layout.ecg This ensures that the rest of the app will remain responsive during rendering.
  */
 public class ECG extends Activity {
     private XYPlot plot;
@@ -53,8 +49,8 @@ public class ECG extends Activity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ecg);
-        Inicio.getConexionBluetooth().pedirPulso();
+        setContentView(R    .layout.ecg);
+
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
 
@@ -64,7 +60,7 @@ public class ECG extends Activity {
         MyFadeFormatter formatter =new MyFadeFormatter(2000);
         formatter.setLegendIconEnabled(false);
         plot.addSeries(ecgSeries, formatter);
-        plot.setRangeBoundaries(0, 1000, BoundaryMode.FIXED);
+        plot.setRangeBoundaries(0, 10, BoundaryMode.FIXED);
         plot.setDomainBoundaries(0, 2000, BoundaryMode.FIXED);
 
         // reduce the number of range labels
@@ -144,12 +140,7 @@ public class ECG extends Activity {
                 @Override
                 public void run() {
                     try {
-                        latestIndex=0;
-
-                        while (true) {
-
-                            String pulso=Inicio.getConexionBluetooth().leePuslo();
-
+                        while (keepRunning) {
                             if (latestIndex >= data.length) {
                                 latestIndex = 0;
                             }
@@ -157,17 +148,10 @@ public class ECG extends Activity {
                             // generate some random data:
                             if (latestIndex % blipInteral == 0) {
                                 // insert a "blip" to simulate a heartbeat:
-                                int valorPulso=Integer.parseInt(pulso);
-                                if(valorPulso>700)
-                                {
-                                    data[latestIndex]=0;
-                                }
-                                else {
-                                data[latestIndex] = Integer.parseInt(pulso);
-                                }
+                                data[latestIndex] = (Math.random() * 10) + 3;
                             } else {
                                 // insert a random sample:
-                                data[latestIndex] = Integer.parseInt(pulso);
+                                data[latestIndex] = Math.random() * 2;
                             }
 
                             if(latestIndex < data.length - 1) {
@@ -183,13 +167,10 @@ public class ECG extends Activity {
                                 keepRunning = false;
                             }
                             latestIndex++;
-                            Thread.sleep(delayMs);
-
                         }
-                    } catch (Exception e) {
+                    } catch (InterruptedException e) {
                         keepRunning = false;
                     }
-
                 }
             });
         }
