@@ -1,19 +1,10 @@
 package com.example.barbie.apnea;
 
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.widget.EditText;
 import android.widget.TextView;
-
 import com.androidplot.xy.XYPlot;
-
-import java.text.DecimalFormat;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Handler;
 
 public class Grafico extends AppCompatActivity {
 
@@ -26,7 +17,7 @@ public class Grafico extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_grafico);
+        setContentView(R.layout.ecg);
 
        /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -35,11 +26,8 @@ public class Grafico extends AppCompatActivity {
         */
         editTextTemp = (TextView)findViewById(R.id.editTextTemp);
         plot = (XYPlot)findViewById(R.id.plot);
-
         final Random r = new Random();
-
         t = new Thread() {
-
             @Override
             public void run() {
                 try {
@@ -59,23 +47,12 @@ public class Grafico extends AppCompatActivity {
                 }
             }
         };
-
         t.start();
-
     }
-
-
-
-    public static void cargarTemperatura(Double temp) {
-        temperatura = temp;
-    }
-    public static void cargarPulso() {}
 
     //Para que la temperatura muestre 2 digitos decimales nada mas
     public Double round(Double value, int digits) {
         Double scale = Math.pow(10, digits);
         return Math.round(value * scale) / scale;
     }
-
-
 }
