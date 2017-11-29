@@ -170,12 +170,10 @@ void loop() {
           durmiendo = false;
           reportarRespiracion = false;
           inicializaValoresCalibracion(); 
-          desactivarActuadores();
           estadoAlarma = 0;
+          desactivarActuadores();
           Serial.println("Finalizar fase de sueño.");
           BT.println(ACK_DESPERTAR);
-          
-          
         }
         break;
         
