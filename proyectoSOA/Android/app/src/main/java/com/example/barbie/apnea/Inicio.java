@@ -117,7 +117,6 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
         super.onResume();
         escucharSensores();
         try {
-            //mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
         } catch (SecurityException e) {
             Toast.makeText(this,"Error al obtener permisos de localización", Toast.LENGTH_SHORT).show();
