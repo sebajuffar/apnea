@@ -103,6 +103,11 @@ public class Inicio extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(intent);
         }
+        if (id==R.id.menuItemEcg) {
+            Intent intent = new Intent(this, ECG.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            this.startActivity(intent);
+        }
         /*if (id==R.id.opcion2) {
             Toast.makeText(this,"Se seleccionó la segunda opción",Toast.LENGTH_LONG).show();
         }
@@ -143,11 +148,12 @@ public class Inicio extends AppCompatActivity {
 
     //Acciones de los botones principales
     public void onClickComenzar(View view){
-        if(appEncendida == false){
+
+        /*if(appEncendida == false){
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
         }else
             Toast.makeText(this, "Aplicacion encendida", Toast.LENGTH_SHORT).show();
-            conexionBluetooth.dormir();
+            conexionBluetooth.dormir();*/
     }
 
     public void onClickDetener(View view){
