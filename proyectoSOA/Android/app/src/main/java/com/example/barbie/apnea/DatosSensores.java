@@ -1,5 +1,8 @@
 package com.example.barbie.apnea;
 
+import android.location.Location;
+import android.util.Log;
+
 import java.text.DecimalFormat;
 
 public class DatosSensores {
@@ -92,5 +95,14 @@ public class DatosSensores {
             }
         }
         return false;
+    }
+
+    public void setLocalizacion(Location location) {
+        Log.d("Localizacion", "Se llamo set");
+        if ( location == null )
+            return;
+        setLatitud(location.getLatitude());
+        setAltitud(location.getAltitude());
+        Log.d("Localizacion", "Se cambio por: " + latitud + " "+ altitud);
     }
 }

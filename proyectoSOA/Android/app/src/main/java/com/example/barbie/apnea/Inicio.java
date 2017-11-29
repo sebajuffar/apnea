@@ -116,11 +116,6 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     protected void onResume() {
         super.onResume();
         escucharSensores();
-        try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-        } catch (SecurityException e) {
-            Toast.makeText(this,"Error al obtener permisos de localización", Toast.LENGTH_SHORT).show();
-        }
         if(conexionBluetooth.estaConectado()) {
             Toast.makeText(this,"Conectado a: " + conexionBluetooth.nombreDispositivo(), Toast.LENGTH_SHORT ).show();
             setTitle("Sleep APNEA [" + conexionBluetooth.nombreDispositivo() + "]");
@@ -132,7 +127,6 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     protected void onPause() {
         pararSensores();
-        mLocationManager.removeUpdates(this);
         super.onPause();
     }
 
@@ -240,11 +234,18 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     private void escucharSensores() {
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),   SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT),           SensorManager.SENSOR_DELAY_NORMAL);
+        try {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+            datosSensores.setLocalizacion(mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        } catch (SecurityException e) {
+            Toast.makeText(this,"Error al obtener permisos de localización", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void pararSensores() {
         mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT));
+        mLocationManager.removeUpdates(this);
     }
 
     @Override
@@ -265,6 +266,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
         }
     }
 
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
         return;
@@ -273,8 +275,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     public void onLocationChanged(Location location) {
         Log.d("GPS","Actualice posicion");
-        datosSensores.setLatitud(location.getLatitude());
-        datosSensores.setLatitud(location.getAltitude());
+        datosSensores.setLocalizacion(location);
     }
 
     @Override
