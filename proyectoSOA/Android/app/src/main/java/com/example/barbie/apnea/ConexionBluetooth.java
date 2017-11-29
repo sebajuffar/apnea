@@ -25,6 +25,8 @@ public class ConexionBluetooth implements Runnable {
     private static Thread hilo = null;
     private boolean flagConectado = false;
     private Reporte reporte;
+    private Queue<String> bufferPulso;
+    boolean pulsoParaGraficar =false;
 
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
@@ -103,6 +105,7 @@ public class ConexionBluetooth implements Runnable {
     public void pedirDesconexion() { enviarDatos(","); }
     public void dormir(){
         enviarDatos("d");
+        pulsoParaGraficar = false;
         pedirPulso();
         pedirRespiracion();
         pedirTemperatura();
@@ -122,6 +125,12 @@ public class ConexionBluetooth implements Runnable {
     }
     public void switchVentilador() { enviarDatos("v"); }
 
+    public void pedirPulsoParaGraficar() {
+        bufferPulso = new ArrayDeque<>();
+        pulsoParaGraficar = true;
+        pedirPulso();
+
+    }
 
     public boolean parsearMensaje(String linea) {
         String []args = linea.split(":");
@@ -138,7 +147,6 @@ public class ConexionBluetooth implements Runnable {
                 break;
             case "DORMIR":
                 if ( flagConectado ){
-                    // TODO: Deberia apagar la pantalla / ir a otro activity
                     reporte = new Reporte();
                     Inicio.setReporteActual(reporte);
                 }
@@ -146,11 +154,16 @@ public class ConexionBluetooth implements Runnable {
             case "DESPERTAR":
                 if ( flagConectado ){
                     reporte.guardar();
+                    //TODO: ACA VA EL MAIL @BARBIE
                 }
                 break;
             case "PULSO":
-                if ( flagConectado && reporte != null ){
-                    reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
+                if ( flagConectado ){
+                    if ( pulsoParaGraficar ) {
+                        addPulsoBuffer(args[1]);
+                    } else if ( reporte != null ) {
+                        reporte.cargarPulso(Long.parseLong(args[1]), Long.parseLong(args[2]));
+                    }
                 }
                 break;
             case "TEMPERATURA":
@@ -180,7 +193,7 @@ public class ConexionBluetooth implements Runnable {
                 break;
             default:
                 Log.d("ThreadBT", "Mensaje desconocido: "+ args[0]);
-            }
+        }
         return true;
     }
 
@@ -264,7 +277,7 @@ public class ConexionBluetooth implements Runnable {
     public String nombreDispositivo() {
         if (estaConectado()) {
             return dispositivoConectado.getName();
-    }
+        }
         return "";
     }
 
@@ -275,5 +288,18 @@ public class ConexionBluetooth implements Runnable {
         }
         return "";
     }
+
+    private void addPulsoBuffer(String pulso){
+        bufferPulso.add(pulso);
+
+    }
+    public String leePuslo(){
+        if(bufferPulso.isEmpty())
+            return "0";
+        else
+            return bufferPulso.poll();
+    }
+
+
 
 }

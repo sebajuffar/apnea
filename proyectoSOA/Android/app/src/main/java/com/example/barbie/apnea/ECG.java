@@ -49,7 +49,8 @@ public class ECG extends Activity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R    .layout.ecg);
+        setContentView(R.layout.ecg);
+        Inicio.getConexionBluetooth().pedirPulsoParaGraficar();
 
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
@@ -60,7 +61,7 @@ public class ECG extends Activity {
         MyFadeFormatter formatter =new MyFadeFormatter(2000);
         formatter.setLegendIconEnabled(false);
         plot.addSeries(ecgSeries, formatter);
-        plot.setRangeBoundaries(0, 10, BoundaryMode.FIXED);
+        plot.setRangeBoundaries(0, 1000, BoundaryMode.FIXED);
         plot.setDomainBoundaries(0, 2000, BoundaryMode.FIXED);
 
         // reduce the number of range labels
@@ -140,21 +141,30 @@ public class ECG extends Activity {
                 @Override
                 public void run() {
                     try {
-                        while (keepRunning) {
+                        latestIndex=0;
+                        while (true) {
+                            String pulso=Inicio.getConexionBluetooth().leePuslo();
                             if (latestIndex >= data.length) {
                                 latestIndex = 0;
                             }
-
                             // generate some random data:
                             if (latestIndex % blipInteral == 0) {
                                 // insert a "blip" to simulate a heartbeat:
-                                data[latestIndex] = (Math.random() * 10) + 3;
+                                int valorPulso=Integer.parseInt(pulso);
+                                if(valorPulso>700)
+                                {
+                                    data[latestIndex]=0;
+                                }
+                                else {
+                                    data[latestIndex] = Integer.parseInt(pulso);
+                                }
                             } else {
                                 // insert a random sample:
-                                data[latestIndex] = Math.random() * 2;
+                                data[latestIndex] = Integer.parseInt(pulso);
                             }
 
                             if(latestIndex < data.length - 1) {
+
                                 // null out the point immediately following i, to disable
                                 // connecting i and i+1 with a line:
                                 data[latestIndex +1] = null;
@@ -162,18 +172,19 @@ public class ECG extends Activity {
 
                             if(rendererRef.get() != null) {
                                 rendererRef.get().setLatestIndex(latestIndex);
-                                Thread.sleep(delayMs);
-                            } else {
                                 keepRunning = false;
                             }
                             latestIndex++;
+                            Thread.sleep(delayMs);
+
                         }
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         keepRunning = false;
                     }
                 }
             });
         }
+
 
         public void start(final WeakReference<AdvancedLineAndPointRenderer> rendererRef) {
             this.rendererRef = rendererRef;
