@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidplot.Plot;
 import com.androidplot.util.Redrawer;
@@ -61,7 +62,8 @@ public class ECG extends Activity {
         editTextTemp = (TextView)findViewById(R.id.editTextTemp);
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
-
+        if(!Inicio.getConexionBluetooth().estaConectado())
+            Toast.makeText(this, "La aplicacion no esta conectada al dispositivo. Por favor, conectelo", Toast.LENGTH_SHORT).show();
         ECGModel ecgSeries = new ECGModel(2000, 200);
 
         // add a new series' to the xyplot:
