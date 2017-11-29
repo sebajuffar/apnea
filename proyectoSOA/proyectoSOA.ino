@@ -340,7 +340,6 @@ void calculaDatosEstadisticos()
   calculaMediaTiempoRespiracion();
   calcularDesvioTiempoRespiracion();
   calcularParametrosConfianza();  
-  delay(10000);         
 }
 
 
