@@ -22,7 +22,7 @@ public class Reporte {
 
 
     public Reporte() {
-        context = Inicio.getContext();
+        //context = Inicio.getContext();
         listaOffsetMillis = new ArrayList<>();
         listaOffsetsAlarmas = new ArrayList<>();
         listaOffsetsEmergencias = new ArrayList<>();
