@@ -35,8 +35,7 @@ import java.lang.ref.*;
  * The alternative is to try synchronously invoking {@link Plot#redraw()} within whatever system is updating
  * the model, which would severely degrade performance.
  *
- * 3 - The plot is set to render using a background thread via config attr in  R.layout.ecg_example.xml.
- * This ensures that the rest of the app will remain responsive during rendering.
+ * 3 - The plot is set to render using a background thread via config attr in  R.layout.ecg This ensures that the rest of the app will remain responsive during rendering.
  */
 public class ECG extends Activity {
     private XYPlot plot;
@@ -50,7 +49,7 @@ public class ECG extends Activity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ecg_example);
+        setContentView(R    .layout.ecg);
 
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
