@@ -36,9 +36,6 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
     private SensorManager mSensorManager;
     private DatosSensores datosSensores;
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +55,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
             }
         });
 
+
         btn_detener.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,13 +63,14 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
             }
         });
 
-
+        /*
         btn_reportes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onClickReportes(view);
             }
         });
+        */
 
         context = getApplicationContext();
 
@@ -199,6 +198,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
         conexionBluetooth.pedirDesconexion();
     }
 
+    /*
     public void onClickReportes(View view){
         if(appEncendida == false){
             Toast.makeText(this, "Encienda la aplicacion", Toast.LENGTH_SHORT).show();
@@ -206,6 +206,7 @@ public class Inicio extends AppCompatActivity implements SensorEventListener {
         conexionBluetooth.pedirRespiracion();
         conexionBluetooth.pedirPulso();
     }
+    */
 
     public static ConexionBluetooth getConexionBluetooth() {
         return conexionBluetooth;

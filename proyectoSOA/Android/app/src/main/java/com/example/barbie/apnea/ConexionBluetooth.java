@@ -154,7 +154,8 @@ public class ConexionBluetooth implements Runnable {
             case "DESPERTAR":
                 if ( flagConectado ){
                     reporte.guardar();
-                    //TODO: ACA VA EL MAIL @BARBIE
+                    Mail mail = new Mail(reporte.getArchivoActual());
+                    mail.mandarMail();
                 }
                 break;
             case "PULSO":
