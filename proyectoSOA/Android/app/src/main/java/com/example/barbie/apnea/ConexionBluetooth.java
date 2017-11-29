@@ -167,9 +167,10 @@ public class ConexionBluetooth implements Runnable {
                 }
                 break;
             case "TEMPERATURA":
-                if ( flagConectado && reporte != null ){
-                    reporte.cargarTemperatura(Double.parseDouble(args[1]), Long.parseLong(args[2]));
+                if ( flagConectado ){
                     ECG.temperatura = Double.parseDouble(args[1]);
+                    if ( reporte != null )
+                        reporte.cargarTemperatura(Double.parseDouble(args[1]), Long.parseLong(args[2]));
                 }
                 break;
             case "RESPIRACION":

@@ -59,6 +59,7 @@ public class ECG extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ecg);
         Inicio.getConexionBluetooth().pedirPulsoParaGraficar();
+        Inicio.getConexionBluetooth().pedirTemperatura();
         editTextTemp = (TextView)findViewById(R.id.editTextTemp);
         // initialize our XYPlot reference:
         plot = (XYPlot) findViewById(R.id.plot);
