@@ -26,7 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Control" />
         <activity
             android:name=".DeviceList"
             android:label="@string/title_activity_btdevice_list"
